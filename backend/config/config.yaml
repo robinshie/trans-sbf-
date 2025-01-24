@@ -1,0 +1,35 @@
+models:
+  openai:
+    system_prompt: "You are a helpful assistant."
+    api_url: "https://api.openai.com/v1/chat/completions"
+    error_message: "API Key not found."
+    models:
+      - "gpt-3.5-turbo"
+      - "gpt-4"
+
+  deepseek:
+    system_prompt: "You are a helpful assistant."
+    api_url: "https://api.deepseek.com/v1/chat/completions"
+    error_message: "API Key not found."
+    models:
+      - "deepseek-chat"
+      - "deepseek-coder"
+
+  ollama:
+    system_prompt: "You are a helpful assistant."
+    api_url: "http://localhost:11434/api"
+    error_message: "Ollama configuration error."
+    models:
+      - "qwen2.5:latest"
+      - "llama2"
+      - "mistral"
+    # Ollama models are dynamically loaded from the system
+
+errors:
+  base: "Model configuration error."
+  file_not_found: "Ollama is not installed. Please check your setup."
+  list_error: "Error retrieving Ollama models: {error}"
+  api_error: "API error: {message}"
+  model_not_found: "Model {model} not found"
+  invalid_response: "Invalid response from API"
+  connection_error: "Connection error: {message}"

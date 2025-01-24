@@ -1,0 +1,155 @@
+/* 布局样式 */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.app-container {
+    display: grid;
+    grid-template-columns: var(--panel-width) minmax(0, 1fr) var(--panel-width);
+    height: 100vh;
+    background-color: var(--bg-secondary);
+    gap: 1px;
+}
+
+/* 面板通用样式 */
+.config-panel,
+.main-panel,
+.chat-panel {
+    background: var(--bg-color);
+    height: 100vh;
+    overflow-y: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 配置面板 */
+.config-panel {
+    border-right: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    z-index: 2;
+}
+
+/* 主面板 */
+.main-panel {
+    background: var(--bg-secondary);
+    z-index: 1;
+}
+
+/* PDF容器 */
+.pdf-container {
+    flex: 1;
+    position: relative;
+    background: var(--bg-tertiary);
+    padding: var(--spacing-md);
+}
+
+.pdf-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: var(--border-radius-lg);
+    background: white;
+    box-shadow: var(--shadow-lg);
+}
+
+/* 聊天面板 */
+.chat-panel {
+    border-left: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    z-index: 2;
+}
+
+.chat-header {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-md);
+    background: var(--bg-secondary);
+}
+
+/* 响应式设计 */
+@media (max-width: 1400px) {
+    .app-container {
+        grid-template-columns: var(--panel-width) minmax(0, 1fr) var(--panel-width);
+    }
+}
+
+@media (max-width: 1200px) {
+    .app-container {
+        grid-template-columns: var(--panel-width) 1fr;
+    }
+    .chat-panel {
+        position: fixed;
+        right: 0;
+        top: 0;
+        width: var(--panel-width);
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+    }
+    .chat-panel.active {
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        grid-template-columns: 1fr;
+    }
+    .config-panel {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: var(--panel-width);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    .config-panel.active {
+        transform: translateX(0);
+    }
+    .main-panel {
+        height: 100vh;
+    }
+}
+
+/* 加载指示器 */
+.loading-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--bg-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

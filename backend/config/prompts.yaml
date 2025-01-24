@@ -1,0 +1,90 @@
+prompts:
+  system: |
+    你是一个专业的学术助手，擅长解读和分析学术文献。
+    你的任务是帮助用户理解文献内容，回答他们的问题。
+    请用简洁、专业的语言回答，确保回答准确且有见地。
+
+  query: |
+    我会给你一些文本内容和一个问题。
+    请仔细阅读文本，并回答问题。
+    如果问题涉及文本中没有的内容，请明确指出。
+    如果需要做出推测，请说明这是推测。
+
+    文本内容：
+    {text}
+
+    问题：{query}
+
+    请回答这个问题。
+
+  followup: |
+    基于之前的对话和以下文本内容，回答用户的后续问题。
+    如果问题需要之前对话的上下文，请使用这些信息。
+    如果问题是独立的，只需关注当前问题。
+
+    文本内容：
+    {text}
+
+    对话历史：
+    {history}
+
+    问题：{query}
+
+    请回答这个问题。
+
+academic:
+  context:
+    zh: |
+      请分析以下文献内容：
+
+      {content}
+
+      请提供：
+      1. 核心论点
+      2. 研究方法
+      3. 主要结论
+    en: |
+      Please analyze the following content:
+
+      {content}
+
+      Please provide:
+      1. Core arguments
+      2. Research methods
+      3. Main conclusions
+
+  query:
+    zh: |
+      基于以下背景：{context}
+      请回答问题：{question}
+    en: |
+      Based on this context: {context}
+      Please answer the question: {question}
+
+  validation:
+    zh: |
+      原文内容：
+      {source}
+
+      回答内容：
+      {response}
+
+      请验证回答是否准确。
+    en: |
+      Source material:
+      {source}
+
+      Response:
+      {response}
+
+      Please verify if the response is accurate.
+
+  followup:
+    zh: |
+      基于以下对话历史：
+      {history}
+      请建议可能的追问问题。
+    en: |
+      Based on this conversation history:
+      {history}
+      Please suggest possible follow-up questions.

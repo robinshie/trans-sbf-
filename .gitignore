@@ -1,0 +1,5 @@
+/.vscode
+/backend.egg-info
+/server.py
+/setup.py
+/uploads

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="AI驱动的智能翻译助手，支持PDF文档翻译和实时对话">
+    <meta name="theme-color" content="#ffffff">
+    <title>AI 翻译助手 | 智能文档翻译</title>
+    <!-- 网站图标 -->
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+
+    
+    <!-- 样式表 -->
+    <link rel="stylesheet" href="styles/variables.css">
+    <link rel="stylesheet" href="styles/layout.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/animations.css">
+    
+    <!-- JavaScript 模块 -->
+    <script type="module">
+        import { app } from './js/app.js';
+        import { ui } from './js/ui.js';
+        import { chat } from './js/chat.js';
+        import { fileHandler } from './js/fileHandler.js';
+
+        // 等待 DOM 加载完成后初始化应用
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                console.info('Initializing application...');
+                await app.init();
+                console.info('Application initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize application:', error);
+                ui.showNotification('应用程序初始化失败', 'error');
+            }
+        });
+    </script>
+</head>
+
+<body class="theme-transition">
+    <!-- 加载指示器 -->
+    <div id="loadingIndicator" class="loading-indicator" role="progressbar" aria-hidden="true">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- 主应用容器 -->
+    <div class="app-container">
+        <!-- 左侧配置面板 -->
+        <aside class="config-panel" role="complementary" aria-label="配置面板">
+            <!-- 模型选择 -->
+            <section class="config-section" aria-labelledby="modelConfigTitle">
+                <h2 id="modelConfigTitle" class="section-title">模型配置</h2>
+                <div class="model-selector">
+                    <div class="select-group">
+                        <select id="manufacturerSelect" class="select-input" aria-label="选择模型厂商">
+                            <option value="" disabled selected>选择模型厂商</option>
+                        </select>
+                    </div>
+                    <div class="select-group">
+                        <select id="modelSelect" class="select-input" aria-label="选择模型">
+                            <option value="" disabled selected>选择模型</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="modelInfo" class="model-info" aria-live="polite"></div>
+            </section>
+
+            <!-- 模板配置 -->
+            <section class="config-section" aria-labelledby="templateConfigTitle">
+                <h2 id="templateConfigTitle" class="section-title">模板配置</h2>
+                <div class="template-selector">
+                    <div class="select-group">
+                        <label for="templateTypeSelect">模板类型</label>
+                        <select id="templateTypeSelect" class="select-input" aria-label="选择模板类型">
+                            <option value="" disabled selected>选择模板类型</option>
+                        </select>
+                    </div>
+                    <div class="select-group">
+                        <label for="templateSubtypeSelect">子类型</label>
+                        <select id="templateSubtypeSelect" class="select-input" aria-label="选择子类型">
+                            <option value="" disabled selected>选择子类型</option>
+                        </select>
+                    </div>
+                    <div class="template-content">
+                        <label for="templateContent">模板内容</label>
+                        <textarea id="templateContent" class="template-textarea" aria-label="模板内容" readonly></textarea>
+                    </div>
+                    <div id="template-vars" class="template-vars" aria-label="模板变量"></div>
+                </div>
+            </section>
+
+            <!-- 文件上传 -->
+            <section class="config-section" aria-labelledby="uploadTitle">
+                <h2 id="uploadTitle" class="section-title">文件上传</h2>
+                <div class="file-upload">
+                    <div class="drop-zone" 
+                         id="dropZone" 
+                         role="button"
+                         tabindex="0"
+                         aria-label="文件上传区域">
+                        <i class="fas fa-file-pdf" aria-hidden="true"></i>
+                        <div class="drop-zone-text">
+                            <span class="primary-text">拖拽PDF文件到此处或点击上传</span>
+                            <span class="secondary-text">支持 .pdf 格式，最大20MB</span>
+                        </div>
+                        <input type="file" 
+                               id="fileInput" 
+                               accept=".pdf"
+                               aria-label="选择PDF文件"
+                               class="file-input">
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <!-- 中间PDF显示区 -->
+        <main class="main-panel" role="main">
+            <div class="pdf-container">
+                <iframe id="pdfViewer" 
+                        class="pdf-viewer"
+                        type="application/pdf"
+                        width="100%"
+                        height="100%"
+                        frameborder="0"
+                        title="PDF查看器"
+                        aria-label="PDF文档显示区域"></iframe>
+            </div>
+        </main>
+
+        <!-- 右侧对话区 -->
+        <aside class="chat-panel" role="complementary" aria-label="AI对话区域">
+            <header class="chat-header">
+                <h2 class="section-title">AI 对话</h2>
+                <div class="header-actions">
+                    <button id="themeToggle" 
+                            class="icon-button" 
+                            aria-label="切换主题"
+                            title="切换主题">
+                        <i class="fas fa-moon" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div id="messagesContainer" class="messages-container">
+                <!-- 消息将在这里动态添加 -->
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="input-wrapper">
+                    <textarea id="userInput" 
+                             class="message-input"
+                             placeholder="请输入您的问题..."
+                             rows="3"
+                             aria-label="消息输入框"></textarea>
+                    <div class="button-group">
+                        <button id="sendButton" 
+                                class="icon-button primary" 
+                                title="发送消息"
+                                aria-label="发送消息">
+                            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                        </button>
+                        <button id="exportButton" 
+                                class="icon-button" 
+                                title="导出对话"
+                                aria-label="导出对话">
+                            <i class="fas fa-file-export" aria-hidden="true"></i>
+                        </button>
+                        <button id="clearButton" 
+                                class="icon-button" 
+                                title="清空对话"
+                                aria-label="清空对话">
+                            <i class="fas fa-trash" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- 通知容器 -->
+    <div id="notificationContainer" 
+         class="notification-container" 
+         role="alert" 
+         aria-live="polite"></div>
+
+    <script type="module">
+        import { fileHandler } from './js/fileHandler.js';
+        import { chat } from './js/chat.js';
+        import { ui } from './js/ui.js';
+
+        // 初始化各个模块
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await fileHandler.init();
+                await chat.init();
+                ui.showNotification('系统初始化完成', 'success');
+            } catch (error) {
+                console.error('初始化失败:', error);
+                ui.showNotification('系统初始化失败', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

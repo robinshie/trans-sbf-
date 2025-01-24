@@ -1,0 +1,34 @@
+/* 动画效果 */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* 应用动画 */
+.notification {
+    animation: slideIn 0.3s ease-out;
+}
+
+.message {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* 过渡效果 */
+.theme-transition {
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
