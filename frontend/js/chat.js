@@ -17,6 +17,11 @@ export const chat = {
             logger.info('Initializing chat module');
             debugger;
             // 获取必要的DOM元素
+
+
+
+
+            
             this.userInput = document.getElementById('userInput');
             this.chatMessages = document.getElementById('messagesContainer');
             this.sendButton = document.getElementById('sendButton');
@@ -81,28 +86,48 @@ export const chat = {
     },
 
     // 初始化模板选择器
-    initializeTemplateSelectors() {
-        // 添加基本模板类型
-        const templateTypes = [
-            { value: 'query', text: '普通对话' },
-            { value: 'translate', text: '翻译' },
-            { value: 'summarize', text: '总结' }
-        ];
-
-        // 清空并添加选项
-        this.templateTypeSelect.innerHTML = '<option value="query">普通对话</option>';
-        templateTypes.forEach(type => {
-            if (type.value !== 'query') {  // 跳过已添加的普通对话选项
+    async initializeTemplateSelectors() {
+        try {
+            debugger;
+            // 从API获取模板列表
+            const templates = await api.getPromptTemplates();
+            
+            // 更新模板选择器
+            const templateSelector = document.getElementById('templateTypeSelect');
+            templateSelector.innerHTML = ''; // 清空现有选项
+            
+            // 添加模板选项
+            templates.forEach(template => {
                 const option = document.createElement('option');
-                option.value = type.value;
-                option.textContent = type.text;
-                this.templateTypeSelect.appendChild(option);
-            }
-        });
+                option.value = template.type;
+                option.textContent = template.name;
+                templateSelector.appendChild(option);
+            });
 
-        // 设置默认值
-        this.templateTypeSelect.value = 'query';
-        this.setTemplate('query');
+            // 设置默认选项
+            if (templates.length > 0) {
+                this.currentTemplate = templates[0].type;
+            }
+        } catch (error) {
+            logger.error('Failed to initialize templates:', error);
+            // 使用默认模板作为后备
+            const defaultTemplates = [
+                { type: 'query', name: '普通对话' },
+                { type: 'translate', name: '翻译' },
+                { type: 'summarize', name: '总结' }
+            ];
+            
+            const templateSelector = document.getElementById('templateTypeSelect');
+            templateSelector.innerHTML = '';
+            defaultTemplates.forEach(template => {
+                const option = document.createElement('option');
+                option.value = template.type;
+                option.textContent = template.name;
+                templateSelector.appendChild(option);
+            });
+            
+            this.currentTemplate = 'query';
+        }
     },
 
     // 设置PDF文件

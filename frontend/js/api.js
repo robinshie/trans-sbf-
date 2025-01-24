@@ -34,6 +34,20 @@ export const api = {
         }
     },
 
+    // 获取模板列表
+    async getPromptTemplates() {
+        try {
+            const response = await fetch('http://localhost:8000/api/v1/prompt/templates');
+            if (!response.ok) {
+                throw new Error('Failed to fetch templates');
+            }
+            return await response.json();
+        } catch (error) {
+            logger.error('API Error - Failed to fetch templates:', error);
+            throw error;
+        }
+    },
+
     // 发送聊天消息
     async sendChatMessage(data) {
         try {
