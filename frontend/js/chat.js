@@ -1,6 +1,7 @@
 import { api } from './api.js';
 import { ui } from './ui.js';
 import { logger } from './logger.js';
+import { toolbar } from './toolbar.js';
 
 // 聊天模块
 export const chat = {
@@ -21,6 +22,7 @@ export const chat = {
         sendButton: null,
         exportButton: null,
         clearButton: null,
+        outtoolButton: null,
         modelInfo: null
     },
     
@@ -48,6 +50,7 @@ export const chat = {
             'sendButton',
             'exportButton',
             'clearButton',
+            'outtoolButton',
             'modelInfo'
         ];
 
@@ -78,6 +81,7 @@ export const chat = {
         // 其他功能按钮事件
         this.elements.exportButton.addEventListener('click', () => this.exportChat());
         this.elements.clearButton.addEventListener('click', () => this.clearChat());
+        this.elements.outtoolButton.addEventListener('click', () => this.outindexChat());
     },
 
     // 处理输入框按键事件
@@ -104,6 +108,12 @@ export const chat = {
         }
     },
 
+    outindexChat() {
+        debugger;
+        toolbar.openMultiplePages([`./readmode.html`,`https://www.google.com/`,`https://translate.google.com/?hl=zh-cn&sl=auto&tl=zh-CN&op=translate`,`https://chatgpt.com/`]);
+
+        ui.showNotification('已切换到外链模式', 'success');
+    },
     // 设置模型
     async setModel(model) {
         try {

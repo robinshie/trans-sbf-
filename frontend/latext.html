@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathJax Dynamic Rendering</title>
+    <script type="text/javascript" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div id="latexContent">Initial LaTeX: \( E = mc^2 \)</div>
+    <button onclick="updateLatex()">Update LaTeX</button>
+
+    <script>
+        const latexElement = document.getElementById('latexContent');
+
+        function updateLatexContent(latex) {
+            console.log('updateLatexContent called with:', latex);
+
+            if (typeof MathJax !== 'undefined') {
+                // 更新内容
+                latexElement.innerHTML = `\\( ${latex} \\)`;
+                console.log('Updated innerHTML, starting MathJax rendering...');
+
+                // 调用 MathJax 渲染
+                MathJax.typesetPromise([latexElement])
+                    .then(() => {
+                        console.log('MathJax rendering complete!');
+                    })
+                    .catch((err) => {
+                        console.error('MathJax rendering error:', err);
+                    });
+            } else {
+                console.error('MathJax is not loaded.');
+            }
+        }
+
+        function updateLatex() {
+            const latex = '\\Omega = \\frac{A}{r^2}';
+            updateLatexContent(latex);
+        }
+    </script>
+</body>
+</html>

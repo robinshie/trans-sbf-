@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阅读模式</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --background-color: #f0f2f5;
+            --text-color: #000;
+            --border-color: #ddd;
+            --button-bg: #007bff;
+            --preview-bg: #fff;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            background: var(--background-color);
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .sidebar {
+            width: 300px;
+            border-right: 1px solid var(--border-color);
+            padding-right: 20px;
+            margin-right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        .preview-area {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--preview-bg);
+            transition: opacity 0.3s;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background: var(--preview-bg);
+            color: var(--text-color);
+        }
+
+        #latexInput {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background: var(--preview-bg);
+            color: var(--text-color);
+        }
+
+        #latexPreview {
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background: var(--preview-bg);
+            overflow-x: auto;
+        }
+
+        body.dark-theme {
+            --background-color: #1a1a1a;
+            --text-color: #fff;
+            --border-color: #555;
+            --button-bg: #0d6efd;
+            --preview-bg: #2d2d2d;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body.system-theme {
+                --background-color: #1a1a1a;
+                --text-color: #fff;
+                --border-color: #555;
+                --button-bg: #0d6efd;
+                --preview-bg: #2d2d2d;
+            }
+        }
+
+        .katex {
+            color: var(--text-color);
+        }
+
+        #themeToggle {
+            margin-top: auto;
+            width: calc(100% - 20px);
+            position: absolute;
+            bottom: 20px;
+        }
+
+        .loading {
+            opacity: 0.5;
+            position: relative;
+        }
+
+        .loading::after {
+            content: "加载中...";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body class="system-theme">
+    <div class="sidebar">
+        <button id="pickFolder">选择文件夹</button>
+        <select id="fileList1"></select>
+        <select id="fileList2"></select>
+        
+        <input type="text" id="latexInput" placeholder="输入LaTeX公式">
+        <div id="latexPreview"></div>
+        
+        <button id="themeToggle">切换主题 (系统)</button>
+    </div>
+    
+    <div class="preview-area">
+        <iframe id="preview1" title="预览窗口1"></iframe>
+        <iframe id="preview2" title="预览窗口2"></iframe>
+    </div>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script>
+        // 主题管理系统
+        const themeToggle = document.getElementById('themeToggle');
+        let currentTheme = localStorage.getItem('theme') || 'system';
+        const systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+
+        function updateTheme() {
+            let effectiveTheme = currentTheme;
+            if (currentTheme === 'system') {
+                effectiveTheme = systemThemeMedia.matches ? 'dark' : 'light';
+            }
+            
+            document.body.className = `${currentTheme}-theme`;
+            themeToggle.textContent = `切换主题 (${currentTheme === 'system' ? '系统' : currentTheme})`;
+            
+            // 更新iframe主题
+            document.querySelectorAll('iframe').forEach(iframe => {
+                if (iframe.contentDocument) {
+                    iframe.contentDocument.documentElement.style.backgroundColor = 
+                        getComputedStyle(document.documentElement).getPropertyValue('--preview-bg');
+                    iframe.contentDocument.body.style.color = 
+                        getComputedStyle(document.documentElement).getPropertyValue('--text-color');
+                }
+            });
+            
+            localStorage.setItem('theme', currentTheme);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            currentTheme = ['system', 'light', 'dark'][(['system', 'light', 'dark'].indexOf(currentTheme) + 1) % 3];
+            updateTheme();
+        });
+        
+        systemThemeMedia.addEventListener('change', updateTheme);
+        updateTheme();
+
+        // LaTeX实时预览
+        const latexInput = document.getElementById('latexInput');
+        const latexPreview = document.getElementById('latexPreview');
+        latexInput.addEventListener('input', () => {
+            try {
+                katex.render(latexInput.value, latexPreview, {
+                    throwOnError: false,
+                    displayMode: true
+                });
+            } catch (e) {
+                latexPreview.innerHTML = '<span style="color: red">公式错误</span>';
+            }
+        });
+
+        // 文件管理系统
+        let currentFiles = [];
+
+        async function scanFolder(dirHandle, path = '') {
+            const files = [];
+            for await (const entry of dirHandle.values()) {
+                const currentPath = `${path}/${entry.name}`;
+                if (entry.kind === 'file') {
+                    const ext = entry.name.split('.').pop().toLowerCase();
+                    if (['html', 'pdf'].includes(ext)) {
+                        files.push({
+                            name: entry.name,
+                            fullPath: currentPath,
+                            type: ext,
+                            handle: entry
+                        });
+                    }
+                } else if (entry.kind === 'directory') {
+                    files.push(...await scanFolder(entry, currentPath));
+                }
+            }
+            return files.sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        function updateFileLists() {
+            const createOption = (file) => {
+                const option = document.createElement('option');
+                option.value = file.fullPath;
+                option.textContent = `${file.name} [${file.type.toUpperCase()}]`;
+                return option;
+            };
+
+            ['fileList1', 'fileList2'].forEach(id => {
+                const list = document.getElementById(id);
+                list.innerHTML = '<option value="">选择文件...</option>';
+                currentFiles.forEach(file => list.appendChild(createOption(file)));
+            });
+        }
+
+        // 文件预览处理器
+        const previewHandler = {
+            async pdf(fileHandle, preview) {
+                preview.classList.add('loading');
+                try {
+                    const file = await fileHandle.getFile();
+                    const blobURL = URL.createObjectURL(file);
+                    
+                    // 强制重置iframe
+                    preview.src = '';
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    
+                    preview.src = blobURL;
+                    preview.onload = () => URL.revokeObjectURL(blobURL);
+                } catch (error) {
+                    console.error('PDF加载失败:', error);
+                    preview.srcdoc = `<p style="color:red">错误: ${error.message}</p>`;
+                } finally {
+                    preview.classList.remove('loading');
+                }
+            },
+
+            async html(fileHandle, preview) {
+                preview.classList.add('loading');
+                try {
+                    const file = await fileHandle.getFile();
+                    const reader = new FileReader();
+                    
+                    await new Promise((resolve, reject) => {
+                        reader.onload = resolve;
+                        reader.onerror = reject;
+                        reader.readAsText(file);
+                    });
+
+                    const content = `
+                        <!DOCTYPE html>
+                        <html>
+                            <head>
+                                <style>
+                                    body {
+                                        background: ${getComputedStyle(document.body)
+                                            .getPropertyValue('--preview-bg')};
+                                        color: ${getComputedStyle(document.body)
+                                            .getPropertyValue('--text-color')};
+                                        margin: 20px;
+                                        transition: all 0.3s;
+                                    }
+                                </style>
+                            </head>
+                            <body>${reader.result}</body>
+                        </html>
+                    `;
+
+                    const blob = new Blob([content], { type: 'text/html' });
+                    const blobURL = URL.createObjectURL(blob);
+                    
+                    // 强制重置iframe
+                    preview.src = '';
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    
+                    preview.src = blobURL;
+                    preview.onload = () => URL.revokeObjectURL(blobURL);
+                } catch (error) {
+                    console.error('HTML加载失败:', error);
+                    preview.srcdoc = `<p style="color:red">错误: ${error.message}</p>`;
+                } finally {
+                    preview.classList.remove('loading');
+                }
+            }
+        };
+
+        // 初始化事件监听
+        document.getElementById('pickFolder').addEventListener('click', async () => {
+            try {
+                const dirHandle = await window.showDirectoryPicker();
+                currentFiles = await scanFolder(dirHandle);
+                
+                // 检查重复文件名
+                const nameMap = new Map();
+                currentFiles.forEach(file => {
+                    const count = nameMap.get(file.name) || 0;
+                    nameMap.set(file.name, count + 1);
+                });
+                
+                if ([...nameMap.values()].some(count => count > 1)) {
+                    alert('注意：存在同名文件，请通过完整路径区分选择！');
+                }
+
+                updateFileLists();
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    alert('文件夹选择取消或出错: ' + error.message);
+                }
+            }
+        });
+
+        // 创建选择器处理器
+        function createFileSelectorHandler(previewId) {
+            return async function() {
+                const preview = document.getElementById(previewId);
+                const filePath = this.value;
+                const file = currentFiles.find(f => f.fullPath === filePath);
+                
+                if (!file) {
+                    preview.src = '';
+                    return;
+                }
+
+                try {
+                    await previewHandler[file.type](file.handle, preview);
+                } catch (error) {
+                    console.error('预览失败:', error);
+                    preview.srcdoc = `<p style="color:red">加载失败: ${error.message}</p>`;
+                }
+            };
+        }
+
+        // 绑定选择器事件
+        document.getElementById('fileList1')
+            .addEventListener('change', createFileSelectorHandler('preview1'));
+        document.getElementById('fileList2')
+            .addEventListener('change', createFileSelectorHandler('preview2'));
+    </script>
+</body>
+</html>

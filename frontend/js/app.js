@@ -35,7 +35,9 @@ export const app = {
     // UI元素引用
     elements: {
         templateTypeSelect: null,
-        templateSubtypeSelect: null
+        templateSubtypeSelect: null,
+        latexInput: null,
+        latexContent: null
     },
 
     // 初始化应用
@@ -58,10 +60,10 @@ export const app = {
                 
                 // 获取并初始化模型数据
                 await this.loadModels();
-          
                 this.initializeElements();
                 // 初始化文件处理模块
                 fileHandler.init(chat);
+                await this.initLatex(); 
                 await this.initTemplates();
                 console.log('Application initialized successfully');
                 ui.showNotification('应用初始化成功', 'success');
@@ -151,11 +153,35 @@ export const app = {
         }
     },
 
+    updateLatexContent(latex) {
+        console.log('updateLatexContent called with:', latex);
+    
+        // 确保 MathJax 已加载
+        if (typeof MathJax !== 'undefined' && this.elements.latexContent) {
+            // 更新 DOM 内容
+            this.elements.latexContent.innerHTML = `\\( ${latex} \\)`;
+    
+            // 调用 MathJax 渲染
+            MathJax.typesetPromise([this.elements.latexContent])
+                .then(() => {
+                    console.log('MathJax rendering complete!');
+                })
+                .catch((err) => {
+                    console.error('MathJax rendering error:', err);
+                });
+        } else {
+            console.error('MathJax is not loaded or latexContent element is missing.');
+        }
+    },
+    
+    // 初始化UI元素
     initializeElements() {
         const elements = [
             'templateTypeSelect',
             'templateSubtypeSelect',
-            'templateContent'
+            'templateContent',
+            'latexInput',
+            'latexContent'
         ];
 
         elements.forEach(id => {
@@ -165,7 +191,16 @@ export const app = {
             }
         });
     },
-
+    
+    async initLatex() {
+        this.elements.latexInput.addEventListener('input', (e) => {
+            const latex = e.target.value.trim(); // 去除多余空格
+            if (latex) {
+                this.updateLatexContent(latex);
+            }
+        });
+    },
+    
     // 初始化模板
     async initTemplates() {
         // 模板选择事件
