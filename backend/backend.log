@@ -1,14 +1,46 @@
 INFO:     Will watch for changes in these directories: ['/home/robin/桌面/trans/backend']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [12295] using StatReload
-INFO:     Started server process [12297]
+INFO:     Started reloader process [24004] using StatReload
+INFO:     Started server process [24006]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:39284 - "GET /api/v1/models HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39294 - "GET /api/v1/models HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39294 - "GET /api/v1/prompt/templates HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39284 - "GET /api/v1/prompt/templates HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41878 - "OPTIONS /api/v1/chat/stream HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41878 - "POST /api/v1/chat/stream HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41878 - "POST /api/v1/chat/stream HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39250 - "POST /api/v1/chat/stream HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40648 - "GET /api/v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40652 - "GET /api/v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40652 - "GET /api/v1/prompt/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40652 - "GET /api/v1/prompt/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39160 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39156 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39158 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37416 - "OPTIONS /api/v1/chat/stream HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37416 - "POST /api/v1/chat/stream HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37394 - "GET /api/v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37400 - "GET /api/v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37410 - "GET /api/v1/prompt/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37418 - "GET /api/v1/prompt/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44858 - "OPTIONS /api/v1/chat/stream HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44858 - "POST /api/v1/chat/stream HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34956 - "GET /api/v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34968 - "GET /api/v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34968 - "GET /api/v1/prompt/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34968 - "GET /api/v1/prompt/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42386 - "GET /api/v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42398 - "GET /api/v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42398 - "GET /api/v1/prompt/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42398 - "GET /api/v1/prompt/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35394 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35406 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35400 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47582 - "GET /api/v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47596 - "GET /api/v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47596 - "GET /api/v1/prompt/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47596 - "GET /api/v1/prompt/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47606 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47582 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47596 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42320 - "GET /api/v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42326 - "GET /api/v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42326 - "GET /api/v1/prompt/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42320 - "GET /api/v1/prompt/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49142 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42326 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42320 - "POST /api/v1/upload HTTP/1.1" 200 OK

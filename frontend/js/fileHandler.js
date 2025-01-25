@@ -2,18 +2,19 @@ import { api } from './api.js';
 import { ui } from './ui.js';
 import { chat } from './chat.js';
 import { logger } from './logger.js';
-
+let isEventsBound = false;
 // 文件处理模块
 export const fileHandler = {
     chat: null,
     pdfViewer: null,
+    isProcessing: false,
 
     // 初始化
     init(chatModule) {
         try {
             logger.info('Initializing file handler...');
             this.chat = chatModule;
-            
+
             // 获取PDF查看器元素
             this.pdfViewer = document.getElementById('pdfViewer');
             if (!this.pdfViewer) {
@@ -23,21 +24,28 @@ export const fileHandler = {
             // 初始化文件拖放区域
             const dropZone = document.getElementById('dropZone');
             const fileInput = document.getElementById('fileInput');
-            
+
             if (!dropZone || !fileInput) {
                 throw new Error('Required file handler elements not found');
             }
 
             // 绑定事件处理器
-            dropZone.addEventListener('dragover', this.handleDragOver.bind(this));
-            dropZone.addEventListener('drop', this.handleDrop.bind(this));
-            fileInput.addEventListener('change', this.handleFileSelect.bind(this));
-            
+            this.bindEvents(dropZone, fileInput);
             logger.info('File handler initialized successfully');
         } catch (error) {
             logger.error('Failed to initialize file handler:', error);
             ui.showNotification('文件处理模块初始化失败', 'error');
         }
+    },
+
+    // 绑定事件处理器
+    bindEvents(dropZone, fileInput) {
+        if (isEventsBound) return; // 避免重复绑定
+        isEventsBound = true;
+    
+        dropZone.addEventListener('dragover', this.handleDragOver.bind(this));
+        dropZone.addEventListener('drop', this.handleDrop.bind(this));
+        fileInput.addEventListener('change', this.handleFileSelect.bind(this));
     },
 
     // 处理拖拽悬停
@@ -88,9 +96,11 @@ export const fileHandler = {
         });
     },
 
-    // 处理文件
 // 处理文件
 async handleFile(file) {
+    if (this.isProcessing) return; // Prevent multiple processing
+    this.isProcessing = true;
+
     try {
         ui.setLoading(true);
         
@@ -145,6 +155,7 @@ async handleFile(file) {
         logger.error('Failed to handle file:', error);
         ui.showNotification(error.message || '文件处理失败', 'error');
     } finally {
+        this.isProcessing = false; // Reset the processing flag
         ui.setLoading(false);
     }
 }

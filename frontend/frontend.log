@@ -1,2 +1,31 @@
-127.0.0.1 - - [25/Jan/2025 16:14:17] "GET /styles/layout.css HTTP/1.1" 304 -
-127.0.0.1 - - [25/Jan/2025 16:14:17] "GET /js/toolbar.js HTTP/1.1" 304 -
+127.0.0.1 - - [25/Jan/2025 16:36:07] "GET /js/chat.js HTTP/1.1" 200 -
+127.0.0.1 - - [25/Jan/2025 16:36:45] code 404, message File not found
+127.0.0.1 - - [25/Jan/2025 16:36:45] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [25/Jan/2025 16:36:45] code 404, message File not found
+127.0.0.1 - - [25/Jan/2025 16:36:45] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [25/Jan/2025 16:36:45] code 404, message File not found
+127.0.0.1 - - [25/Jan/2025 16:36:45] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [25/Jan/2025 16:42:41] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [25/Jan/2025 16:42:41] "GET /styles/layout.css HTTP/1.1" 304 -
+127.0.0.1 - - [25/Jan/2025 16:42:41] "GET /js/app.js HTTP/1.1" 304 -
+127.0.0.1 - - [25/Jan/2025 16:42:41] "GET /js/chat.js HTTP/1.1" 200 -
+127.0.0.1 - - [25/Jan/2025 16:42:41] "GET /js/toolbar.js HTTP/1.1" 304 -
+127.0.0.1 - - [25/Jan/2025 16:42:43] code 404, message File not found
+127.0.0.1 - - [25/Jan/2025 16:42:43] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [25/Jan/2025 16:42:43] code 404, message File not found
+127.0.0.1 - - [25/Jan/2025 16:42:43] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [25/Jan/2025 16:42:43] code 404, message File not found
+127.0.0.1 - - [25/Jan/2025 16:42:43] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [25/Jan/2025 16:46:51] "GET /styles/variables.css HTTP/1.1" 304 -
+127.0.0.1 - - [25/Jan/2025 16:46:51] "GET /js/chat.js HTTP/1.1" 200 -
+127.0.0.1 - - [25/Jan/2025 16:46:51] "GET /js/fileHandler.js HTTP/1.1" 304 -
+127.0.0.1 - - [25/Jan/2025 16:46:51] "GET /js/api.js HTTP/1.1" 304 -
+127.0.0.1 - - [25/Jan/2025 16:48:14] "GET /js/chat.js HTTP/1.1" 200 -
+127.0.0.1 - - [25/Jan/2025 16:48:20] code 404, message File not found
+127.0.0.1 - - [25/Jan/2025 16:48:20] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [25/Jan/2025 16:51:54] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [25/Jan/2025 16:51:54] "GET /js/chat.js HTTP/1.1" 304 -
+127.0.0.1 - - [25/Jan/2025 16:51:54] "GET /js/app.js HTTP/1.1" 304 -
+127.0.0.1 - - [25/Jan/2025 16:54:59] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [25/Jan/2025 16:54:59] "GET /js/ui.js HTTP/1.1" 304 -
+127.0.0.1 - - [25/Jan/2025 16:54:59] "GET /js/chat.js HTTP/1.1" 304 -

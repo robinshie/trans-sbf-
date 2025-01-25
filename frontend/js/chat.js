@@ -2,7 +2,8 @@ import { api } from './api.js';
 import { ui } from './ui.js';
 import { logger } from './logger.js';
 import { toolbar } from './toolbar.js';
-
+// 绑定事件
+let isEventsBound = false;
 // 聊天模块
 export const chat = {
     // 状态管理
@@ -73,16 +74,17 @@ export const chat = {
         await this.setModel(defaultModel);
     },
 
-    // 绑定事件
     bindEvents() {
-        // 发送消息事件
+        if (isEventsBound) return; // 避免重复绑定
+        isEventsBound = true;
+    
         this.elements.sendButton.addEventListener('click', () => this.sendMessage());
         this.elements.userInput.addEventListener('keydown', this.handleInputKeydown.bind(this));
-        // 其他功能按钮事件
         this.elements.exportButton.addEventListener('click', () => this.exportChat());
         this.elements.clearButton.addEventListener('click', () => this.clearChat());
         this.elements.outtoolButton.addEventListener('click', () => this.outindexChat());
-    },
+    }
+    ,
 
     // 处理输入框按键事件
     handleInputKeydown(e) {
@@ -100,19 +102,45 @@ export const chat = {
     // 设置PDF文件
     setPdfFile(filename) {
         try {
+            if (this.state.isProcessing) {
+                logger.warn('Message processing in progress');
+                return;
+            }
+            this.state.isProcessing = true;
             logger.info('Setting PDF file:', filename);
             this.state.currentPdfFile = filename;
         } catch (error) {
             logger.error('Failed to set PDF file', error);
             ui.showNotification('设置PDF文件失败', 'error');
+        }finally{
+            this.state.isProcessing = false;
         }
     },
 
     outindexChat() {
-        debugger;
-        toolbar.openMultiplePages([`./readmode.html`,`https://www.google.com/`,`https://translate.google.com/?hl=zh-cn&sl=auto&tl=zh-CN&op=translate`,`https://chatgpt.com/`]);
-
-        ui.showNotification('已切换到外链模式', 'success');
+        if (this.state.isProcessing) {
+            logger.warn('Message processing in progress');
+            return;
+        }
+        try {
+            this.state.isProcessing = true;
+            this.updateUIState(true, this.elements.outtoolButton);
+            toolbar.openMultiplePages([
+                `./readmode.html`,
+                `https://www.google.com/`,
+                `https://translate.google.com/?hl=zh-cn&sl=auto&tl=zh-CN&op=translate`,
+                `https://chatgpt.com/`
+            ]);
+    
+            ui.showNotification('已切换到外链模式', 'success');
+        } catch (error) {
+            logger.error('Failed to switch to external mode', error);
+            ui.showNotification('切换到外链模式失败', 'error');
+        } finally {
+            // Any cleanup or finalization code can go here
+            this.state.isProcessing = false; // Ensure isProcessing is reset
+            this.updateUIState(false, this.elements.outtoolButton);
+        }
     },
     // 设置模型
     async setModel(model) {
@@ -156,7 +184,7 @@ export const chat = {
 
         try {
             this.state.isProcessing = true;
-            this.updateUIState(true);
+            this.updateUIState(true, this.elements.sendButton);
             this.elements.userInput.value = '';
 
             const messageId = this.addMessage('user', message);
@@ -166,7 +194,7 @@ export const chat = {
             this.addMessage('error', `发送消息失败: ${error.message}`);
         } finally {
             this.state.isProcessing = false;
-            this.updateUIState(false);
+            this.updateUIState(false, this.elements.sendButton);
         }
     },
 
@@ -288,47 +316,63 @@ export const chat = {
     },
 
     // 更新UI状态
-    updateUIState(processing) {
-        this.elements.sendButton.disabled = processing;
-        this.elements.userInput.disabled = processing;
-        this.elements.sendButton.textContent = processing;
-        ;
+    updateUIState(processing, button) {
+        button.disabled = processing;
+        button.disabled = processing;
     },
 
     // 导出聊天记录
     exportChat() {
         try {
+            if (this.state.isProcessing) {
+                logger.warn('Message processing in progress');
+                return;
+            }    
+            this.state.isProcessing = true;
+            this.updateUIState(true, this.elements.exportButton);
             const chatContent = this.state.messageHistory
-                .map(msg => `${msg.role === 'user' ? '用户' : 'AI'}: ${msg.content}`)
-                .join('\n\n');
-
-            const blob = new Blob([chatContent], { type: 'text/plain;charset=utf-8' });
+                .map(msg => `<p><strong>${msg.role === 'user' ? '用户' : 'AI'}:</strong> ${msg.content}</p>`)
+                .join('\n');
+    
+            const blob = new Blob([`<html><body>${chatContent}</body></html>`], { type: 'text/html;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             
             const a = document.createElement('a');
             a.href = url;
-            a.download = `chat_export_${new Date().toISOString()}.txt`;
+            a.download = `chat_export_${new Date().toISOString()}.html`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-
+    
             ui.showNotification('聊天记录导出成功', 'success');
         } catch (error) {
             logger.error('Failed to export chat', error);
             ui.showNotification('导出聊天记录失败', 'error');
+        }finally{
+            this.state.isProcessing = false;
+            this.updateUIState(false, this.elements.exportButton);
         }
     },
 
     // 清空聊天记录
     clearChat() {
         try {
+            if (this.state.isProcessing) {
+                logger.warn('Message processing in progress');
+                return;
+            }    
+            this.state.isProcessing = true;
+            this.updateUIState(true, this.elements.clearButton);
             this.elements.messagesContainer.innerHTML = '';
             this.state.messageHistory = [];
             ui.showNotification('聊天记录已清空', 'success');
         } catch (error) {
             logger.error('Failed to clear chat', error);
             ui.showNotification('清空聊天记录失败', 'error');
+        }finally{
+            this.state.isProcessing = false;
+            this.updateUIState(false, this.elements.clearButton);
         }
     },
  
