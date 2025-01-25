@@ -89,76 +89,63 @@ export const fileHandler = {
     },
 
     // 处理文件
-    async handleFile(file) {
-        try {
-            ui.setLoading(true);
-            
-            if (!file) {
-                throw new Error('No file provided');
-            }
-
-            // 检查文件类型
-            console.log('File type:', file.type);
-            if (file.type !== 'application/pdf' && file.type !== 'text/plain') {
-                throw new Error('不支持的文件类型，请上传PDF或文本文件');
-            }
-
-            // 检查文件大小（20MB限制）
-            const maxSize = 20 * 1024 * 1024;
-            if (file.size > maxSize) {
-                throw new Error('文件太大，请上传20MB以下的文件');
-            }
-
-            // 读取文件内容
-            const content = await this.readFileContent(file);
-            
-            // 只对文本文件记录内容
-            if (file.type === 'text/plain') {
-                console.log('File content type:', typeof content);
-                console.log('File content starts with:', content.substring(0, 100));
-            }
-            
-            // 如果是PDF文件，创建blob URL并显示在查看器中
-            if (file.type === 'application/pdf') {
-                const blob = new Blob([content], { type: 'application/pdf' });
-                const blobUrl = URL.createObjectURL(blob);
-                const pdfViewer = document.getElementById('pdfViewer');
-                if (pdfViewer) {
-                    pdfViewer.src = blobUrl;
-                } else {
-                    throw new Error('PDF viewer element not found');
-                }
-            }
-
-            // 确保聊天模块可用
-            if (!this.chat) {
-                throw new Error('Chat module not available');
-            }
-
-            // 更新聊天模块的文件名
-            if (this.chat && typeof this.chat.setPdfFile === 'function') {
-                this.chat.setPdfFile(file.name);
-            }
-
-            // 发送文件内容到聊天
-            if (typeof this.chat.sendMessage === 'function') {
-                // 设置输入框内容
-                const userInput = document.getElementById('userInput');
-                if (userInput) {
-                    userInput.value = content;
-                }
-                // 触发发送
-                await this.chat.sendMessage();
-            } else {
-                throw new Error('Chat sendMessage function not available');
-            }
-
-            ui.showNotification('文件处理成功', 'success');
-        } catch (error) {
-            logger.error('Failed to handle file:', error);
-            ui.showNotification(error.message || '文件处理失败', 'error');
-        } finally {
-            ui.setLoading(false);
+// 处理文件
+async handleFile(file) {
+    try {
+        ui.setLoading(true);
+        
+        if (!file) {
+            throw new Error('No file provided');
         }
+
+        // 检查文件类型
+        console.log('File type:', file.type);
+        if (file.type !== 'application/pdf' && file.type !== 'text/plain') {
+            throw new Error('不支持的文件类型，请上传PDF或文本文件');
+        }
+
+        // 检查文件大小（20MB限制）
+        const maxSize = 20 * 1024 * 1024;
+        if (file.size > maxSize) {
+            throw new Error('文件太大，请上传20MB以下的文件');
+        }
+
+        // 上传文件到服务器
+        const uploadResponse = await api.uploadFile(file);
+        if (!uploadResponse) {
+            throw new Error('文件上传失败');
+        }
+
+        // 读取文件内容用于本地显示
+        const content = await this.readFileContent(file);
+        
+        // 如果是PDF文件，创建blob URL并显示在查看器中
+        if (file.type === 'application/pdf') {
+            const blob = new Blob([content], { type: 'application/pdf' });
+            const blobUrl = URL.createObjectURL(blob);
+            if (this.pdfViewer) {
+                this.pdfViewer.src = blobUrl;
+            } else {
+                throw new Error('PDF viewer element not found');
+            }
+        }
+
+        // 确保聊天模块可用
+        if (!this.chat) {
+            throw new Error('Chat module not available');
+        }
+
+        // 更新聊天模块的文件名
+        if (this.chat && typeof this.chat.setPdfFile === 'function') {
+            this.chat.setPdfFile(file.name);
+        }
+
+        ui.showNotification('文件处理成功', 'success');
+    } catch (error) {
+        logger.error('Failed to handle file:', error);
+        ui.showNotification(error.message || '文件处理失败', 'error');
+    } finally {
+        ui.setLoading(false);
     }
+}
 };

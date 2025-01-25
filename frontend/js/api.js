@@ -37,7 +37,7 @@ export const api = {
     // 获取模板列表
     async getPromptTemplates() {
         try {
-            const response = await fetch('http://localhost:8000/api/v1/prompt/templates');
+            const response = await fetch(`${API_BASE}/prompt/templates`);
             if (!response.ok) {
                 throw new Error('Failed to fetch templates');
             }
@@ -46,6 +46,28 @@ export const api = {
             logger.error('API Error - Failed to fetch templates:', error);
             throw error;
         }
+    },
+
+        // 上传文件
+    async uploadFile(file) {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+    
+                const response = await fetch(`${API_BASE}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`Upload failed with status: ${response.status}`);
+                }
+    
+                return await response.json();
+            } catch (error) {
+                logger.error('Failed to upload file:', error);
+                throw error;
+            }
     },
 
     // 发送聊天消息
