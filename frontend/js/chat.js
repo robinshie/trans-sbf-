@@ -362,7 +362,7 @@ export const chat = {
     
             // Fetch the CSS styles and then create the blob
             this.getStyles().then(styles => {
-                const blob = new Blob([`<html><head>${styles}</head><body>${chatContent}</body></html>`], { type: 'text/html;charset=utf-8' });
+                const blob = new Blob([`<html><head>${styles}</head><body><div class="messages-container">${chatContent}</div></body></html>`], { type: 'text/html;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 
                 const a = document.createElement('a');
@@ -385,9 +385,10 @@ export const chat = {
     },
     
     async getStyles() {
-        const response = await fetch('/styles/components.css');
-        const cssText = await response.text();
-        return `<style>${cssText}</style>`;
+        const files = ['/styles/animations.css', '/styles/components.css', '/styles/layout.css', '/styles/variables.css'];
+        const cssPromises = files.map(file => fetch(file).then(response => response.text()));
+        const cssTexts = await Promise.all(cssPromises);
+        return `<style>${cssTexts.join('\n')}</style>`;
     },
 
     // 清空聊天记录
