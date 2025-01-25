@@ -254,27 +254,53 @@ export const chat = {
     },
 
     // 添加消息到界面
-    addMessage(role, content) {
+    addMessage(role, content, title = '') {
         try {
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${role}-message`;
+            messageDiv.className = `message ${role}`; // Use role for styling
             messageDiv.id = `msg-${Date.now()}`;
-
+    
+            // Create a title div if a title is provided
+            if (title) {
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'message-title'; // Add a class for the title
+                titleDiv.textContent = title; // Set the title text
+                messageDiv.appendChild(titleDiv); // Append title to the message div
+            }
+    
             const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-
+            contentDiv.className = 'message-content'; // Use existing class for content
+    
+            // Add an Emoji based on the role
+            let emoji = '';
+            if (role === 'user') {
+                emoji = '👤'; // User Emoji
+            } else if (role === 'ai') {
+                emoji = '🤖'; // AI Emoji
+            } else if (role === 'system') {
+                emoji = '🤖'; // System Emoji
+            }
+    
+            // Create a span for the emoji
+            const emojiSpan = document.createElement('span');
+            emojiSpan.textContent = emoji;
+            emojiSpan.className = 'emoji'; // Optional: add a class for styling
+    
+            // Check if the content is a PDF
             if (content.startsWith('data:application/pdf')) {
                 const iframe = this.createPdfIframe(content);
                 contentDiv.appendChild(iframe);
             } else {
-                contentDiv.innerHTML = content;
+                contentDiv.innerHTML = content; // Set the content
             }
-
-            messageDiv.appendChild(contentDiv);
-            this.elements.messagesContainer.appendChild(messageDiv);
+    
+            // Append the emoji and content to the message div
+            messageDiv.appendChild(emojiSpan);
+            messageDiv.appendChild(contentDiv); // Append content to the message div
+            this.elements.messagesContainer.appendChild(messageDiv); // Append message div to the container
             this.scrollToBottom();
             this.state.messageHistory.push({ role, content });
-
+    
             return messageDiv.id;
         } catch (error) {
             logger.error('Failed to add message:', error);
@@ -330,29 +356,39 @@ export const chat = {
             }    
             this.state.isProcessing = true;
             this.updateUIState(true, this.elements.exportButton);
-            const chatContent = this.state.messageHistory
-                .map(msg => `<p><strong>${msg.role === 'user' ? '用户' : 'AI'}:</strong> ${msg.content}</p>`)
-                .join('\n');
     
-            const blob = new Blob([`<html><body>${chatContent}</body></html>`], { type: 'text/html;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `chat_export_${new Date().toISOString()}.html`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            // Get the HTML content of the messages container
+            const messagesContainer = document.getElementById('messagesContainer');
+            const chatContent = messagesContainer.innerHTML; // Get the inner HTML
     
-            ui.showNotification('聊天记录导出成功', 'success');
+            // Fetch the CSS styles and then create the blob
+            this.getStyles().then(styles => {
+                const blob = new Blob([`<html><head>${styles}</head><body>${chatContent}</body></html>`], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `chat_export_${new Date().toISOString()}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+    
+                ui.showNotification('聊天记录导出成功', 'success');
+            });
         } catch (error) {
             logger.error('Failed to export chat', error);
             ui.showNotification('导出聊天记录失败', 'error');
-        }finally{
+        } finally {
             this.state.isProcessing = false;
             this.updateUIState(false, this.elements.exportButton);
         }
+    },
+    
+    async getStyles() {
+        const response = await fetch('/styles/components.css');
+        const cssText = await response.text();
+        return `<style>${cssText}</style>`;
     },
 
     // 清空聊天记录

@@ -100,6 +100,12 @@
     margin-left: auto;
 }
 
+.message-title {
+    font-weight: bold;
+    margin-bottom: 5px; /* Space between title and content */
+    color: var(--text-primary); /* Adjust color as needed */
+}
+
 .message-content {
     padding: var(--spacing-md);
     border-radius: var(--border-radius-lg);
@@ -108,7 +114,7 @@
     box-shadow: var(--shadow-sm);
 }
 
-.message.ai .message-content {
+.message.system .message-content {
     background-color: var(--message-ai-bg);
     color: var(--text-primary);
 }
@@ -116,6 +122,47 @@
 .message.user .message-content {
     background-color: var(--message-user-bg);
     color: var(--message-user-text);
+}
+
+/* Emojo Styles */
+.emojo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacing-lg);
+    background-color: var(--emojo-bg);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.emojo-icon {
+    font-size: 2em;
+    color: var(--emojo-color);
+    margin-right: var(--spacing-sm);
+}
+
+.emojo-text {
+    font-size: 1.1em;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Additional Emojo variations */
+.emojo-success {
+    background-color: var(--success-bg);
+}
+
+.emojo-warning {
+    background-color: var(--warning-bg);
+}
+
+.emojo-error {
+    background-color: var(--error-bg);
+}
+.emoji {
+    font-size: 1.5em; /* Adjust size as needed */
+    margin-right: 8px; /* Space between emoji and content */
+    vertical-align: middle; /* Align emoji with text */
 }
 
 /* 按钮 */
