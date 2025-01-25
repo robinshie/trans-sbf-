@@ -1,0 +1,2 @@
+127.0.0.1 - - [25/Jan/2025 16:14:17] "GET /styles/layout.css HTTP/1.1" 304 -
+127.0.0.1 - - [25/Jan/2025 16:14:17] "GET /js/toolbar.js HTTP/1.1" 304 -
