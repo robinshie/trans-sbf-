@@ -3,7 +3,6 @@ export const ui = {
     // 初始化UI
     init() {
         try {
-            debugger;
             console.info('Initializing UI module');
             
             // 初始化通知容器

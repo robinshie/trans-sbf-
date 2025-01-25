@@ -19,7 +19,9 @@ class PromptConfig:
     @classmethod
     def get_prompt(cls, key: str, category: str = 'prompts') -> str:
         """获取提示词"""
-        return cls._prompts.get(category, {}).get(key, "")
+
+        prompt = cls._prompts.get(category, {}).get(key, "")
+        return prompt
 
 class CausalPromptFactory:
     """提示词工厂类，用于构建不同场景的提示词"""

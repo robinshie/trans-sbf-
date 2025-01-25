@@ -11,7 +11,6 @@ export const fileHandler = {
     // 初始化
     init(chatModule) {
         try {
-            debugger;
             logger.info('Initializing file handler...');
             this.chat = chatModule;
             
@@ -92,7 +91,6 @@ export const fileHandler = {
     // 处理文件
     async handleFile(file) {
         try {
-            debugger;
             ui.setLoading(true);
             
             if (!file) {

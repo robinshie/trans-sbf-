@@ -8,12 +8,39 @@ import { fileHandler } from './fileHandler.js';
 export const app = {
     // 全局状态
     modelsData: null,
-    templateTypes: null,
+    state: {
+        currentTemplate: null,
+        globalTemplates: [
+            {
+                type: 'prompts',
+                name: 'prompts',
+                subtypes: [
+                    { type: 'system', name: 'system' },
+                    { type: 'query', name: 'query' },
+                    { type: 'followup', name: 'followup' }
+                ]
+            },
+            {
+                type: 'academic',
+                name: 'academic',
+                subtypes: [
+                    { type: 'context', name: 'context' },
+                    { type: 'value', name: 'value' },
+                    { type: 'validation', name: 'validation' }
+                ]
+            }
+        ]
+    },
+
+    // UI元素引用
+    elements: {
+        templateTypeSelect: null,
+        templateSubtypeSelect: null
+    },
 
     // 初始化应用
     async init() {
         try {
-            debugger;
             console.log('Initializing application...');
             
             // 显示加载状态
@@ -31,10 +58,11 @@ export const app = {
                 
                 // 获取并初始化模型数据
                 await this.loadModels();
-                
+          
+                this.initializeElements();
                 // 初始化文件处理模块
                 fileHandler.init(chat);
-                
+                await this.initTemplates();
                 console.log('Application initialized successfully');
                 ui.showNotification('应用初始化成功', 'success');
             } catch (error) {
@@ -123,6 +151,89 @@ export const app = {
         }
     },
 
+    initializeElements() {
+        const elements = [
+            'templateTypeSelect',
+            'templateSubtypeSelect',
+            'templateContent'
+        ];
+
+        elements.forEach(id => {
+            this.elements[id] = document.getElementById(id);
+            if (!this.elements[id]) {
+                throw new Error(`Required element not found: ${id}`);
+            }
+        });
+    },
+
+    // 初始化模板
+    async initTemplates() {
+        // 模板选择事件
+        // 修改bindEvents方法中的模板选择事件
+        this.elements.templateTypeSelect.addEventListener('change', (e) => {
+            this.state.currentTemplate = e.target.value;
+            this.updateSubtemplateSelectors(); // 更新子模板
+            this.setTemplate(e.target.value);
+        });
+
+        this.elements.templateSubtypeSelect.addEventListener('change', (e) => {
+            if (e.target.value) {
+                const currentType = this.state.currentTemplate;
+                const subtype = e.target.value;
+                this.setTemplate(`${currentType}.${subtype}`); // 组合完整的模板标识符
+               
+            }
+        });
+        await this.fetchTemplates()
+        this.updateTemplateSelectors();
+        this.updateSubtemplateSelectors();
+        this.updateTemplateContent();
+    },
+    
+    // 获取模板的独立函数
+    async fetchTemplates() {
+        try {
+            const templates = await api.getPromptTemplates();
+            this.state.globalTemplates = templates; // 更新全局变量
+            return templates;
+        } catch (error) {
+            logger.error('Failed to fetch templates:', error);
+            return this.state.globalTemplates;
+        }
+    },
+    // 更新子模板选择器
+    updateSubtemplateSelectors() {
+        try {
+            this.elements.templateSubtypeSelect.innerHTML = '';
+
+            const subtemplates = this.state.globalTemplates.find(template => 
+                template.type === this.state.currentTemplate)?.subtypes || [];
+            subtemplates.forEach(template => {
+                const option = document.createElement('option');
+                option.value = template.name;
+                option.textContent = template.name;
+                this.elements.templateSubtypeSelect.appendChild(option);
+            });
+            chat.setDefaultTemplate(this.state.currentTemplate);
+        } catch (error) {
+            logger.error('Failed to update subtemplate selectors:', error);
+            ui.showNotification('更新模板子类型失败', 'error');
+        }
+    },
+    // 更新模板选择器
+    updateTemplateSelectors() {
+            this.elements.templateTypeSelect.innerHTML = '';
+            this.state.globalTemplates.forEach(template => {
+                const option = document.createElement('option');
+                option.value = template.type;
+                option.textContent = template.name;
+                this.elements.templateTypeSelect.appendChild(option);
+            });
+    
+            if (this.state.globalTemplates.length > 0) {
+                this.state.currentTemplate = this.state.globalTemplates[0].type;
+            }
+    },
     // 初始化模型选择器
     initializeModelSelectors() {
         if (!this.modelsData || !Array.isArray(this.modelsData)) {
@@ -191,96 +302,38 @@ export const app = {
             }
         });
     },
-
-    // 初始化模板选择器
-    initializeTemplateSelectors() {
-        if (!this.templateTypes) {
-            console.error('Template types not initialized');
-            return;
-        }
-        debugger;
-
-        const templateTypeSelect = document.getElementById('templateTypeSelect');
-        const templateSubtypeSelect = document.getElementById('templateSubtypeSelect');
-        const templateContent = document.getElementById('templateContent');
-        
-        if (!templateTypeSelect || !templateSubtypeSelect || !templateContent) {
-            console.error('Template elements not found');
-            return;
-        }
-        
-        // 初始化模板类型选择器
-        templateTypeSelect.innerHTML = '<option value="">选择模板类型</option>';
-        Object.entries(this.templateTypes).forEach(([typeKey, typeData]) => {
-            const option = document.createElement('option');
-            option.value = typeKey;
-            option.textContent = typeData.name;
-            templateTypeSelect.appendChild(option);
-        });
-        
-        // 监听模板类型变化
-        templateTypeSelect.addEventListener('change', (e) => {
-            const typeKey = e.target.value;
-            this.updateTemplateSubtypes(typeKey);
-        });
-        
-        // 监听模板子类型变化
-        templateSubtypeSelect.addEventListener('change', (e) => {
-            const typeKey = templateTypeSelect.value;
-            const subtypeKey = e.target.value;
-            this.updateTemplateContent(typeKey, subtypeKey);
-        });
-    },
-
-    // 更新模板子类型
-    updateTemplateSubtypes(typeKey) {
-        const templateSubtypeSelect = document.getElementById('templateSubtypeSelect');
-        const templateContent = document.getElementById('templateContent');
-        
-        if (!templateSubtypeSelect || !templateContent) {
-            console.error('Template elements not found');
-            return;
-        }
-        
-        templateSubtypeSelect.innerHTML = '<option value="">选择模板子类型</option>';
-        templateContent.value = '';
-        
-        if (!typeKey || !this.templateTypes[typeKey]) return;
-        
-        const subtypes = this.templateTypes[typeKey].subtypes;
-        subtypes.forEach((subtype, index) => {
-            const option = document.createElement('option');
-            option.value = index;
-            option.textContent = subtype.name;
-            templateSubtypeSelect.appendChild(option);
-        });
-    },
-
-    // 更新模板内容
-    updateTemplateContent(typeKey, subtypeKey) {
-        const templateContent = document.getElementById('templateContent');
-        
-        if (!templateContent) {
-            console.error('Template content element not found');
-            return;
-        }
-        
-        if (!typeKey || !subtypeKey || !this.templateTypes[typeKey]) {
-            templateContent.value = '';
-            return;
-        }
-        
-        const subtypes = this.templateTypes[typeKey].subtypes;
-        const template = subtypes[subtypeKey];
-        if (template) {
-            templateContent.value = template.content || '';
+       // 更新模板内容
+    updateTemplateContent() {
+        try {
+            // 从globalTemplates中获取当前选中的模板和子模板
+            const currentTemplate = this.state.globalTemplates.find(
+                template => template.type === this.state.currentTemplate
+            );
             
-            // 通知chat模块模板已更新
-            if (chat && typeof chat.setTemplate === 'function') {
-                chat.setTemplate(template.content);
+            if (currentTemplate && currentTemplate.subtypes) {
+                const currentSubtype = currentTemplate.subtypes.find(
+                    subtype => subtype.name === this.elements.templateSubtypeSelect.value
+                );
+                
+                if (currentSubtype) {
+                    this.elements.templateContent.value = currentSubtype.content || '';
+                }
             }
+        } catch (error) {
+            logger.error('Failed to update template content:', error);
+            ui.showNotification('更新模板内容失败', 'error');
         }
-    }
+    },
+    // 设置模板
+    setTemplate(template) {
+        try {
+            this.updateTemplateContent();
+            logger.info('Template set to:', template);
+        } catch (error) {
+            logger.error('Failed to set template:', error);
+            ui.showNotification('设置模板失败', 'error');
+        }
+    },
 };
 
 // 初始化应用
