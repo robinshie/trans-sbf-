@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from ..models.chat import ChatRequest
 from ..services.chat_service import ChatService
-from .file_controller import pdf_contents
 import json
 
 router = APIRouter()
@@ -16,12 +15,7 @@ async def chat_stream(request: ChatRequest):
     """流式聊天接口"""
     try:
         # 获取活跃的PDF上下文
-        pdf_context = ""
-        if hasattr(request, 'pdf_context') and request.pdf_context and request.pdf_context in pdf_contents:
-            pdf_context = pdf_contents[request.pdf_context]['text']
-
-        
-        request.message = pdf_context
+        request.message = request.message
 
         # 创建一个异步生成器来处理流式响应
         async def generate_response():
@@ -29,7 +23,8 @@ async def chat_stream(request: ChatRequest):
                 request.message,
                 request.model_choice,
                 request.history,
-                request.prompt_type
+                request.prompt_type,
+                request.pdf_context
             ):
                 # 确保每个块都是完整的字符串
                 if isinstance(chunk, str):

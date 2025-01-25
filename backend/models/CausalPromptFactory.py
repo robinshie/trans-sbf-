@@ -1,15 +1,8 @@
 import os
 import yaml
-from typing import List, Dict, Any
-from pydantic import BaseModel
 import re
-import asyncio
-
-class ChatMessage(BaseModel):
-    """聊天消息模型"""
-    role: str
-    content: str
-
+from typing import List, Dict, Any
+from backend.models.chat import ChatMessage\
 
 class PromptConfig:
     """提示词配置管理"""
@@ -43,7 +36,7 @@ class CausalPromptFactory:
         """从模板中提取占位符键"""
         return re.findall(r'\{(.*?)\}', template)
         
-    async def build_prompt(self, params: Dict[str, Any]) -> List[ChatMessage]:
+    async def build_prompt(self, params: Dict[str, Any]):
         """
         构建查询提示词
 
@@ -55,9 +48,13 @@ class CausalPromptFactory:
         """
         messages = []
         prompt_type = params.get('prompt_type', 'prompts')
-        
+        role = 'user'
         # 遍历 prompt 的节点类型
         for node in self.config.get_prompt_nodes(prompt_type):
+            if node == 'system':
+                role = 'system'
+            else:
+                role = 'user'
             # 获取当前节点的模板
             node_template = self.config.get_prompt(node, prompt_type)
             if not node_template:
@@ -73,7 +70,7 @@ class CausalPromptFactory:
                 
                 # 处理列表和字符串类型的值
                 if isinstance(value, list):
-                    value = "\n\n".join(value)
+                    value = "\n\n".join(str(v) for v in value)
                 elif isinstance(value, str):
                     pass  # 字符串直接使用
                 else:
@@ -83,32 +80,6 @@ class CausalPromptFactory:
                 filled_content = filled_content.replace(f"{{{key}}}", value)
             
             # 添加消息
-            messages.append(ChatMessage(role=node, content=filled_content))
+            messages.append(ChatMessage(role=role, content=filled_content))
         
         return messages
-
-
-# 测试函数
-async def test_build_prompt():
-    factory = CausalPromptFactory()
-    
-    # 测试参数
-    params = {
-        'query': 'What is the context?',
-        'text': ["赛季法", "赛季法的详细信息"],  # 字符串形式
-        'texts_details': "赛季法的详细信息",  # 更长的占位符
-        'prompt_type': 'prompts',  # 自定义 prompt_type
-        'history': ['dsfsdf','sdfsdf']  # 可选参数
-    }
-    
-    # 调用 build_prompt 方法
-    result = await factory.build_prompt(params)
-    
-    # 输出结果
-    for message in result:
-        print(f"{message.role}: {message.content}")
-
-
-# 异步运行测试
-if __name__ == '__main__':
-    asyncio.run(test_build_prompt())
