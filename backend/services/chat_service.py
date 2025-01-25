@@ -26,7 +26,8 @@ class ChatService:
                     *history,
                     ChatMessage(role="user", content=self.prompt_factory.config.get_prompt('followup', prompt_type).format(
                         text="",
-                        query=message
+                        query=message,
+                        history=history
                     ))
                 ]
             else:

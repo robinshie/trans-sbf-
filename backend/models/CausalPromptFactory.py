@@ -77,7 +77,7 @@ class CausalPromptFactory:
         # 添加历史对话
         for msg in history:
             messages.append(ChatMessage(
-                role="user" if msg['role'] == 'user' else "assistant",
+                role="user" if msg['role'] == 'user' else "system",
                 content=msg['content']
             ))
         

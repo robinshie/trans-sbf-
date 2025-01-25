@@ -58,7 +58,7 @@ class ChatRequest(BaseModel):
         description="聊天历史",
         example=[
             {"role": "user", "content": "你好"},
-            {"role": "assistant", "content": "你好！有什么我可以帮你的吗？"}
+            {"role": "system", "content": "你好！有什么我可以帮你的吗？"}
         ]
     )
 

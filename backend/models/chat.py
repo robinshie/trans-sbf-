@@ -15,4 +15,4 @@ class ChatRequest(BaseModel):
     model_choice: ModelChoice
     history: Optional[List[ChatMessage]] = []
     prompt_type: Optional[str] = "query"
-    pdf_filename: Optional[str] = None  # 添加PDF文件名字段
+    pdf_context: Optional[str] = None  # 添加PDF文件名字段

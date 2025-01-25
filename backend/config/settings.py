@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     """应用配置"""
     # API配置
     API_V1_STR: str = "/api/v1"
-    PROJECT_NAME: str = "Translation Assistant API"
+    PROJECT_NAME: str = "Assistant API"
     
     # CORS配置
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [

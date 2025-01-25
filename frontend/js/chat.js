@@ -169,7 +169,7 @@ export const chat = {
             throw new Error('No response stream received');
         }
 
-        const responseMessageId = this.addMessage('assistant', '');
+        const responseMessageId = this.addMessage('system', '');
         await this.handleStreamResponse(stream, responseMessageId);
     },
 
@@ -189,7 +189,7 @@ export const chat = {
         };
 
         if (this.state.currentPdfFile) {
-            requestData.pdf_filename = this.state.currentPdfFile;
+            requestData.pdf_context = this.state.currentPdfFile;
         }
 
         return requestData;

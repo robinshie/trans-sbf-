@@ -17,8 +17,8 @@ async def chat_stream(request: ChatRequest):
     try:
         # 获取活跃的PDF上下文
         pdf_context = ""
-        if hasattr(request, 'pdf_filename') and request.pdf_filename and request.pdf_filename in pdf_contents:
-            pdf_context = pdf_contents[request.pdf_filename]['text']
+        if hasattr(request, 'pdf_context') and request.pdf_context and request.pdf_context in pdf_contents:
+            pdf_context = pdf_contents[request.pdf_context]['text']
 
         
         request.message = pdf_context
