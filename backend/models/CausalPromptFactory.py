@@ -1,12 +1,15 @@
 import os
 import yaml
-from typing import List, Dict, Optional
+from typing import List, Dict, Any
 from pydantic import BaseModel
+import re
+import asyncio
 
 class ChatMessage(BaseModel):
     """聊天消息模型"""
     role: str
     content: str
+
 
 class PromptConfig:
     """提示词配置管理"""
@@ -19,9 +22,14 @@ class PromptConfig:
     @classmethod
     def get_prompt(cls, key: str, category: str = 'prompts') -> str:
         """获取提示词"""
-
         prompt = cls._prompts.get(category, {}).get(key, "")
         return prompt
+
+    @classmethod
+    def get_prompt_nodes(cls, category: str = 'prompts') -> List[str]:
+        """获取提示词节点"""
+        return list(cls._prompts.get(category, {}).keys())
+
 
 class CausalPromptFactory:
     """提示词工厂类，用于构建不同场景的提示词"""
@@ -30,103 +38,77 @@ class CausalPromptFactory:
         """初始化提示词工厂"""
         self.config = PromptConfig()
     
-    async def build_query_prompt(self, query: str, texts: List[str]) -> List[ChatMessage]:
+    @staticmethod
+    def extract_keys(template: str) -> List[str]:
+        """从模板中提取占位符键"""
+        return re.findall(r'\{(.*?)\}', template)
+        
+    async def build_prompt(self, params: Dict[str, Any]) -> List[ChatMessage]:
         """
         构建查询提示词
-        
+
         Args:
-            query: 用户查询
-            texts: 相关文本列表
-            
+            params (Dict[str, Any]): 包含 'query', 'texts', 'prompt_type', 和 'history' 的字典。
+
         Returns:
             List[ChatMessage]: 完整的提示词消息列表
         """
-        messages = [
-            ChatMessage(role="system", content=self.config.get_prompt('system', 'prompts'))
-        ]
+        messages = []
+        prompt_type = params.get('prompt_type', 'prompts')
         
-        # 合并所有文本
-        text_content = "\n\n".join([t for t in texts if t]) if texts else "没有提供文本内容。"
-        
-        # 查询提示词
-        query_prompt = self.config.get_prompt('query', 'prompts').format(
-            text=text_content,
-            query=query
-        )
-        messages.append(ChatMessage(role="user", content=query_prompt))
-        
-        return messages
-    
-    async def build_followup_prompt(self, query: str, texts: List[str], 
-                                  history: List[Dict[str, str]]) -> List[ChatMessage]:
-        """
-        构建后续对话提示词
-        
-        Args:
-            query: 用户查询
-            texts: 相关文本列表
-            history: 对话历史
+        # 遍历 prompt 的节点类型
+        for node in self.config.get_prompt_nodes(prompt_type):
+            # 获取当前节点的模板
+            node_template = self.config.get_prompt(node, prompt_type)
+            if not node_template:
+                continue
             
-        Returns:
-            List[ChatMessage]: 完整的提示词消息列表
-        """
-        messages = [
-            ChatMessage(role="system", content=self.config.get_prompt('system', 'prompts'))
-        ]
-        
-        # 添加历史对话
-        for msg in history:
-            messages.append(ChatMessage(
-                role="user" if msg['role'] == 'user' else "system",
-                content=msg['content']
-            ))
-        
-        # 合并所有文本
-        text_content = "\n\n".join([t for t in texts if t]) if texts else "没有提供文本内容。"
-        
-        # 构建后续对话提示词
-        followup_prompt = self.config.get_prompt('followup', 'prompts').format(
-            text=text_content,
-            query=query
-        )
-        messages.append(ChatMessage(role="user", content=followup_prompt))
+            # 提取模板中的占位符并按长度降序排序（确保最大匹配优先）
+            keys = sorted(self.extract_keys(node_template), key=len, reverse=True)
+            
+            # 替换占位符为实际值
+            filled_content = node_template
+            for key in keys:
+                value = params.get(key, f"{{{key}}}")  # 如果未提供参数，保留占位符
+                
+                # 处理列表和字符串类型的值
+                if isinstance(value, list):
+                    value = "\n\n".join(value)
+                elif isinstance(value, str):
+                    pass  # 字符串直接使用
+                else:
+                    value = str(value)  # 其他类型转为字符串
+                
+                # 替换占位符
+                filled_content = filled_content.replace(f"{{{key}}}", value)
+            
+            # 添加消息
+            messages.append(ChatMessage(role=node, content=filled_content))
         
         return messages
 
-class AcademicReadingAssistant:
-    """学术文献分析系统"""
+
+# 测试函数
+async def test_build_prompt():
+    factory = CausalPromptFactory()
     
-    _prompt_path = os.path.join(os.path.dirname(__file__), "..", "config", "prompts.yaml")
+    # 测试参数
+    params = {
+        'query': 'What is the context?',
+        'text': ["赛季法", "赛季法的详细信息"],  # 字符串形式
+        'texts_details': "赛季法的详细信息",  # 更长的占位符
+        'prompt_type': 'prompts',  # 自定义 prompt_type
+        'history': ['dsfsdf','sdfsdf']  # 可选参数
+    }
     
-    @classmethod
-    async def build_context_prompt(cls, pdf_content: str, language: str = "中文") -> List[ChatMessage]:
-        """构建上下文分析提示"""
-        with open(cls._prompt_path, 'r', encoding='utf-8') as f:
-            prompts = yaml.safe_load(f)['academic']
-        
-        messages = [
-            ChatMessage(role="system", content=prompts['system']),
-            ChatMessage(role="user", content=prompts['context'].format(
-                content=pdf_content,
-                language=language
-            ))
-        ]
-        return messages
+    # 调用 build_prompt 方法
+    result = await factory.build_prompt(params)
     
-    @classmethod
-    async def build_query_prompt(cls, question: str, context_tags: list, 
-                               language: str = "中文") -> List[ChatMessage]:
-        """构建问题分析提示"""
-        with open(cls._prompt_path, 'r', encoding='utf-8') as f:
-            prompts = yaml.safe_load(f)['academic']
-        
-        context = "\n".join(context_tags)
-        messages = [
-            ChatMessage(role="system", content=prompts['system']),
-            ChatMessage(role="user", content=prompts['query'].format(
-                context=context,
-                question=question,
-                language=language
-            ))
-        ]
-        return messages
+    # 输出结果
+    for message in result:
+        print(f"{message.role}: {message.content}")
+
+
+# 异步运行测试
+if __name__ == '__main__':
+    asyncio.run(test_build_prompt())

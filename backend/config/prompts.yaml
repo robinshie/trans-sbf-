@@ -1,7 +1,4 @@
 prompts:
-  ai: |
-    你是一个机器人，和我聊天，请回答我问题。
-
   system: |
     你是一个专业的学术助手，擅长解读和分析学术文献。
     你的任务是帮助用户理解文献内容，回答他们的问题。
@@ -36,58 +33,31 @@ prompts:
     请回答这个问题。
 
 academic:
+  system: |
+    你是一个专业的学术助手，擅长解读和分析学术文献。
+    你的任务是帮助用户理解文献内容，回答他们的问题。
+    如果是中文，请用中文回答。
+    如果是英文，请用英文回答。
   context:
-    zh: |
-      请分析以下文献内容：
-
-      {content}
-
-      请提供：
-      1. 核心论点
-      2. 研究方法
-      3. 主要结论
-    en: |
-      Please analyze the following content:
-
-      {content}
-
-      Please provide:
-      1. Core arguments
-      2. Research methods
-      3. Main conclusions
+    请分析以下文献内容：
+    {content}
+    请提供：
+    1. 核心论点
+    2. 研究方法
+    3. 主要结论
 
   query:
-    zh: |
-      基于以下背景：{context}
-      请回答问题：{question}
-    en: |
-      Based on this context: {context}
-      Please answer the question: {question}
+    基于以下背景：{context}
+    请回答问题：{question}
 
   validation:
-    zh: |
       原文内容：
       {source}
-
       回答内容：
       {response}
-
       请验证回答是否准确。
-    en: |
-      Source material:
-      {source}
-
-      Response:
-      {response}
-
-      Please verify if the response is accurate.
 
   followup:
-    zh: |
-      基于以下对话历史：
-      {history}
-      请建议可能的追问问题。
-    en: |
-      Based on this conversation history:
-      {history}
-      Please suggest possible follow-up questions.
+    基于以下对话历史：
+    {history}
+    请建议可能的追问问题。
