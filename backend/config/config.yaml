@@ -1,4 +1,13 @@
 models:
+  # Ollama models are dynamically loaded from the system
+  ollama:
+    system_prompt: "You are a helpful assistant."
+    api_url: "http://localhost:11434/api"
+    error_message: "Ollama configuration error."
+    models:
+      - "qwen2.5:latest"
+      - "llama2"
+      - "mistral"
   openai:
     system_prompt: "You are a helpful assistant."
     api_url: "https://api.openai.com/v1/chat/completions"
@@ -15,16 +24,7 @@ models:
       - "deepseek-chat"
       - "deepseek-coder"
 
-  ollama:
-    system_prompt: "You are a helpful assistant."
-    api_url: "http://localhost:11434/api"
-    error_message: "Ollama configuration error."
-    models:
-      - "qwen2.5:latest"
-      - "llama2"
-      - "mistral"
-    # Ollama models are dynamically loaded from the system
-
+   
 errors:
   base: "Model configuration error."
   file_not_found: "Ollama is not installed. Please check your setup."

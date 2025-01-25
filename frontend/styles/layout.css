@@ -10,7 +10,7 @@ body {
 
 .app-container {
     display: grid;
-    grid-template-columns: var(--panel-width) minmax(0, 1fr) var(--panel-width);
+    grid-template-columns: 1fr 4fr 5fr; 
     height: 100vh;
     background-color: var(--bg-secondary);
     gap: 1px;
