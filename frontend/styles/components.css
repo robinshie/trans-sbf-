@@ -107,6 +107,7 @@
 }
 
 .message-content {
+    white-space: pre-wrap; /* 保留 HTML 中的换行符 */
     padding: var(--spacing-md);
     border-radius: var(--border-radius-lg);
     font-size: 0.95em;

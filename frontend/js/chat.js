@@ -285,7 +285,6 @@ export const chat = {
             const emojiSpan = document.createElement('span');
             emojiSpan.textContent = emoji;
             emojiSpan.className = 'emoji'; // Optional: add a class for styling
-    
             // Check if the content is a PDF
             if (content.startsWith('data:application/pdf')) {
                 const iframe = this.createPdfIframe(content);
@@ -411,7 +410,7 @@ export const chat = {
             this.updateUIState(false, this.elements.clearButton);
         }
     },
- 
+    
 };
 
 // 导出聊天模块
