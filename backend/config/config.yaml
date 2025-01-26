@@ -5,6 +5,7 @@ models:
     api_url: "http://localhost:11434/api"
     error_message: "Ollama configuration error."
     models:
+      - "deepseek-r1:8b"
       - "qwen2.5:latest"
   openai:
     system_prompt: "You are a helpful assistant."
