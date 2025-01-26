@@ -6,8 +6,6 @@ models:
     error_message: "Ollama configuration error."
     models:
       - "qwen2.5:latest"
-      - "llama2"
-      - "mistral"
   openai:
     system_prompt: "You are a helpful assistant."
     api_url: "https://api.openai.com/v1/chat/completions"
@@ -23,6 +21,7 @@ models:
     error_message: "API Key not found."
     models:
       - "deepseek-chat"
+      - "deepseek-reasoner"
       - "deepseek-coder"
 
    

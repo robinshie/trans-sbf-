@@ -1,9 +1,4 @@
-127.0.0.1 - - [25/Jan/2025 20:22:40] "GET / HTTP/1.1" 304 -
-127.0.0.1 - - [25/Jan/2025 20:22:40] "GET /styles/variables.css HTTP/1.1" 304 -
-127.0.0.1 - - [25/Jan/2025 20:22:40] "GET /styles/components.css HTTP/1.1" 304 -
-127.0.0.1 - - [25/Jan/2025 20:22:40] "GET /js/app.js HTTP/1.1" 304 -
-127.0.0.1 - - [25/Jan/2025 20:22:40] "GET /js/ui.js HTTP/1.1" 304 -
-127.0.0.1 - - [25/Jan/2025 20:22:40] "GET /js/fileHandler.js HTTP/1.1" 304 -
-127.0.0.1 - - [25/Jan/2025 20:22:40] "GET /js/chat.js HTTP/1.1" 304 -
-127.0.0.1 - - [25/Jan/2025 20:22:40] "GET /js/toolbar.js HTTP/1.1" 304 -
-127.0.0.1 - - [25/Jan/2025 20:22:40] "GET /js/theme.js HTTP/1.1" 304 -
+127.0.0.1 - - [26/Jan/2025 10:05:43] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [26/Jan/2025 10:06:26] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [26/Jan/2025 10:06:26] "GET /styles/components.css HTTP/1.1" 304 -
+127.0.0.1 - - [26/Jan/2025 10:06:26] "GET /js/chat.js HTTP/1.1" 304 -

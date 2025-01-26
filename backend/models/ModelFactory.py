@@ -44,9 +44,21 @@ class OpenAIModel(ChatModel):
             "Content-Type": "application/json"
         }
         
+        role_groups = {}
+        for msg in messages:
+            role = msg.role
+            if role not in role_groups:
+                role_groups[role] = []
+            role_groups[role].append(msg.content)
+
+        merged_messages = [
+            {'role': role, 'content': ' '.join(contents)}
+            for role, contents in role_groups.items()
+        ]
+
         data = {
             "model": self.model_name,
-            "messages": [msg.dict() for msg in messages],
+            "messages": merged_messages,
             "stream": True
         }
         
@@ -69,6 +81,8 @@ class OpenAIModel(ChatModel):
                         chunk = json.loads(line[6:])
                         if chunk.get("choices") and chunk["choices"][0].get("delta", {}).get("content"):
                             yield chunk["choices"][0]["delta"]["content"]
+                        elif chunk.get("choices") and chunk["choices"][0].get("delta", {}).get("reasoning_content"):
+                            yield chunk["choices"][0]["delta"]["reasoning_content"]
                     except json.JSONDecodeError:
                         continue
 
@@ -81,9 +95,21 @@ class OllamaModel(ChatModel):
         
     async def stream_chat(self, messages: List[ChatMessage]) -> AsyncGenerator[str, None]:
         """生成流式响应"""
+        role_groups = {}
+        for msg in messages:
+            role = msg.role
+            if role not in role_groups:
+                role_groups[role] = []
+            role_groups[role].append(msg.content)
+
+        merged_messages = [
+            {'role': role, 'content': ' '.join(contents)}
+            for role, contents in role_groups.items()
+        ]
+
         data = {
             "model": self.model_name,
-            "messages": [msg.dict() for msg in messages],
+            "messages": merged_messages,
             "stream": True
         }
         
@@ -102,6 +128,8 @@ class OllamaModel(ChatModel):
                     chunk = json.loads(line)
                     if chunk.get("message", {}).get("content"):
                         yield chunk["message"]["content"]
+                    elif chunk.get("message", {}).get("reasoning_content"):
+                        yield chunk["message"]["reasoning_content"]
                 except json.JSONDecodeError:
                     continue
 
@@ -119,9 +147,21 @@ class DeepSeekModel(ChatModel):
             "Content-Type": "application/json"
         }
         
+        role_groups = {}
+        for msg in messages:
+            role = msg.role
+            if role not in role_groups:
+                role_groups[role] = []
+            role_groups[role].append(msg.content)
+
+        merged_messages = [
+            {'role': role, 'content': ' '.join(contents)}
+            for role, contents in role_groups.items()
+        ]
+
         data = {
             "model": self.model_name,
-            "messages": [msg.dict() for msg in messages],
+            "messages": merged_messages,
             "stream": True
         }
         
@@ -142,6 +182,8 @@ class DeepSeekModel(ChatModel):
                         chunk = json.loads(line[6:])
                         if chunk.get("choices") and chunk["choices"][0].get("delta", {}).get("content"):
                             yield chunk["choices"][0]["delta"]["content"]
+                        elif chunk.get("choices") and chunk["choices"][0].get("delta", {}).get("reasoning_content"):
+                            yield chunk["choices"][0]["delta"]["reasoning_content"]
                     except json.JSONDecodeError:
                         continue
 
