@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from backend.config.settings import get_settings
 from backend.controllers import chat_router, file_router, model_router, prompt_router
-import os
 
 # 加载配置
 settings = get_settings()
