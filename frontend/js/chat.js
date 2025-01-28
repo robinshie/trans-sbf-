@@ -219,7 +219,7 @@ export const chat = {
                 manufacturer: this.state.currentModel.manufacturer,
                 model: this.state.currentModel.name
             },
-            history: this.state.messageHistory.map(msg => ({
+            history: this.state.messageHistory.slice(-5).map(msg => ({
                 role: msg.role,
                 content: msg.content
             })),
