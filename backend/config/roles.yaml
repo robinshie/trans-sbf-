@@ -1,0 +1,10 @@
+roles:
+  system: 
+    name: system
+    nodename: system
+  user: 
+    name: user
+    nodename: quary
+  assistence: 
+    name: assistence
+    nodename: assistence

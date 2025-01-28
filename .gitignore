@@ -5,3 +5,7 @@
 /uploads
 /backend/uploads
 /styles/frontend.log
+/log
+
+**/logs**
+**/__pycache__**

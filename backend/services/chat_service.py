@@ -30,29 +30,7 @@ class ChatService:
                 'prompt_type': prompt_type,
                 'history': history
             })
-            # # 构建提示词
-            # if history:
-            #     # 如果有历史记录，使用followup prompt
-            #     messages = [
-            #         ChatMessage(role="system", content=self.prompt_factory.config.get_prompt('system', prompt_type)),
-            #         *history,
-            #         ChatMessage(role="user", content=self.prompt_factory.config.get_prompt('followup', prompt_type).format(
-            #             text="",
-            #             query=message,
-            #             history=history
-            #         ))
-            #     ]
-            # else:
-            #     # 否则使用query prompt
-            #     messages = [
-            #         ChatMessage(role="system", content=self.prompt_factory.config.get_prompt('system', prompt_type)),
-            #         ChatMessage(role="user", content=self.prompt_factory.config.get_prompt('query', prompt_type).format(
-            #             text="",
-            #             query=message
-            #         ))
-            #     ]
             
-            # 获取模型实例
             model = ModelFactory.create_model({
                 'manufacturer': model_choice.manufacturer,
                 'model': model_choice.model

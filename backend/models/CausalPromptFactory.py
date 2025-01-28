@@ -2,7 +2,53 @@ import os
 import yaml
 import re
 from typing import List, Dict, Any
-from backend.models.chat import ChatMessage\
+from backend.models.chat import ChatMessage, Role
+import asyncio
+
+class RoleConfig:
+    """提示词配置管理"""
+    
+    # 加载提示词配置
+    _prompt_path = os.path.join(os.path.dirname(__file__), "..", "config", "roles.yaml")
+    with open(_prompt_path, 'r', encoding='utf-8') as f:
+        _prompts = yaml.safe_load(f)
+
+    @classmethod
+    def get_prompt(cls, key: str, category: str = 'roles') -> str:
+        """获取提示词"""
+        prompt = cls._prompts.get(category, {}).get(key, "")
+        return prompt
+
+    @classmethod
+    def get_prompt_nodes(cls, category: str = 'roles') -> List[str]:
+        """获取提示词节点"""
+        return list(cls._prompts.get(category, {}).keys())
+
+    @classmethod
+    def get_role_name(cls, node_name: str) -> str:
+        """获取指定角色名称"""
+        role_info = cls._prompts['roles'].get(node_name, {})
+        return role_info.get('name', None)
+
+class AssistanceConfig:
+    """提示词配置管理"""
+    
+    # 加载提示词配置
+    _prompt_path = os.path.join(os.path.dirname(__file__), "..", "config", "assistantes.yaml")
+    with open(_prompt_path, 'r', encoding='utf-8') as f:
+        _prompts = yaml.safe_load(f)
+
+    @classmethod
+    def get_prompt(cls, key: str, category: str = 'roles') -> str:
+        """获取提示词"""
+        prompt = cls._prompts.get(category, {}).get(key, "")
+        return prompt
+
+    @classmethod
+    def get_prompt_nodes(cls, category: str = 'roles') -> List[str]:
+        """获取提示词节点"""
+        return list(cls._prompts.get(category, {}).keys())
+
 
 class PromptConfig:
     """提示词配置管理"""
@@ -30,6 +76,7 @@ class CausalPromptFactory:
     def __init__(self):
         """初始化提示词工厂"""
         self.config = PromptConfig()
+        self.role = RoleConfig()
     
     @staticmethod
     def extract_keys(template: str) -> List[str]:
@@ -48,13 +95,14 @@ class CausalPromptFactory:
         """
         messages = []
         prompt_type = params.get('prompt_type', 'prompts')
-        role = 'user'
+        role = ''
         # 遍历 prompt 的节点类型
         for node in self.config.get_prompt_nodes(prompt_type):
-            if node == 'system':
-                role = 'system'
-            else:
-                role = 'user'
+            rolename = self.role.get_role_name(node)
+            if rolename is not None:
+                role = rolename
+            else: 
+                role = 'assistant' 
             # 获取当前节点的模板
             node_template = self.config.get_prompt(node, prompt_type)
             if not node_template:
@@ -83,3 +131,7 @@ class CausalPromptFactory:
             messages.append(ChatMessage(role=role, content=filled_content))
         
         return messages
+    
+    async def build_role(self, role: Role):
+        # Implementation logic for handling the role
+        print(f'Building role: {role}')

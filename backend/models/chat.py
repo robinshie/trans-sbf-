@@ -16,3 +16,13 @@ class ChatRequest(BaseModel):
     history: Optional[List[ChatMessage]] = []
     prompt_type: Optional[str] = "prompts"
     pdf_context: Optional[str] = None  # 添加PDF文件名字段
+
+class Assistant(BaseModel):
+    name: str
+
+class Tools(BaseModel):
+    name: str
+
+class Role(BaseModel):
+    name:str
+    nodename:str
