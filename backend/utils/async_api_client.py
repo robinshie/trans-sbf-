@@ -33,40 +33,38 @@ class AsyncAPIClient:
         )
         return httpx.AsyncClient(transport=transport)
 
-    async def async_request(self, method: str, endpoint: str, **kwargs) -> Dict:
-        """
-        发送异步 HTTP 请求（支持 GET / POST）。
-        """
-        url = f"{self.base_url}/{endpoint.strip('/')}"
-        
-        try:
-            response = await self.client.request(method, url, **kwargs)
-            response.raise_for_status()
-            return response.json()
-        except httpx.HTTPStatusError as e:
-            raise Exception(f"HTTP Error: {e.response.status_code} - {e.response.text}")
-        except json.JSONDecodeError:
-            raise Exception("Invalid JSON response from API")
-
     async def async_stream_request(self, endpoint: str, **kwargs) -> AsyncGenerator[str, None]:
         """
         发送流式请求（streaming），并解析逐步返回的 JSON 数据。
+        兼容 DeepSeek 和 OpenAI 的不同格式。
         """
         url = f"{self.base_url}/{endpoint.strip('/')}"
-        
+
         async with self.client.stream("POST", url, **kwargs) as response:
             if response.status_code != 200:
                 error_msg = await response.text()
                 raise Exception(f"API error: {error_msg}")
-            async for line in response.aiter_lines(): 
-                try:
-                    chunk = json.loads(line)
-                    # 解析 `content`
-                    if "message" in chunk and "content" in chunk["message"]:
-                        yield chunk["message"]["content"]
-                    # 解析 `reasoning_content`
-                    elif "message" in chunk and "reasoning_content" in chunk["message"]:
-                        yield chunk["message"]["reasoning_content"]
-                except json.JSONDecodeError:
-                    continue
+
+            async for line in response.aiter_lines():
+                if line.startswith("data: "):
+                    try:
+                        chunk = json.loads(line[6:])  # 去掉 "data: " 前缀
+                        
+                        # ✅ 处理 DeepSeek 格式
+                        if "message" in chunk:
+                            if "content" in chunk["message"]:
+                                yield chunk["message"]["content"]
+                            elif "reasoning_content" in chunk["message"]:
+                                yield chunk["message"]["reasoning_content"]
+
+                        # ✅ 处理 OpenAI 格式
+                        elif "choices" in chunk:
+                            delta = chunk["choices"][0].get("delta", {})
+                            if "content" in delta:
+                                yield delta["content"]
+                            elif "refusal" in delta:
+                                yield delta["refusal"]
+
+                    except json.JSONDecodeError:
+                        continue
 

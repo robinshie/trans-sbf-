@@ -53,9 +53,7 @@ class OpenAIModel(ChatModel):
             "messages": [msg.dict() for msg in messages],
             "stream": True
         }        
-        json_data = json.dumps(data)
-
-        async for chunk in self.async_stream_request("/chat/completions", headers=headers, json=json_data):
+        async for chunk in self.async_stream_request("/chat/completions", headers=headers, json=data):
             yield chunk
 
 class OllamaModel(ChatModel):
@@ -100,7 +98,6 @@ class DeepSeekModel(ChatModel):
             "messages": [msg.dict() for msg in messages],
             "stream": True
         }
-        json_data = json.dumps(data)
 
-        async for chunk in self.async_stream_request("/chat/completions", headers=headers, json=json_data):
+        async for chunk in self.async_stream_request("/chat/completions", headers=headers, json=data):
             yield chunk

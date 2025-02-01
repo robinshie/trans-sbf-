@@ -34,7 +34,7 @@ async def chat_stream(request: ChatRequest):
 
         return StreamingResponse(
             generate_response(),
-            media_type="text/text",
+            media_type="text/json",
             headers={
                 "X-Accel-Buffering": "no",
                 "Cache-Control": "no-cache",
