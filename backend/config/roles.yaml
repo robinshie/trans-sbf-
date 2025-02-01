@@ -4,7 +4,7 @@ roles:
     nodename: system
   user: 
     name: user
-    nodename: quary
+    nodename: query
   assistence: 
     name: assistence
     nodename: assistence

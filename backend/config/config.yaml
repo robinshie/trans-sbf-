@@ -9,7 +9,7 @@ models:
       - "qwen2.5:latest"
   openai:
     system_prompt: "You are a helpful assistant."
-    api_url: "https://api.openai.com/v1/chat/completions"
+    api_url: "https://api.openai.com/v1"
     error_message: "API Key not found."
     models:
       - "gpt-3.5-turbo"
@@ -18,7 +18,7 @@ models:
 
   deepseek:
     system_prompt: "You are a helpful assistant."
-    api_url: "https://api.deepseek.com/v1/chat/completions"
+    api_url: "https://api.deepseek.com/v1"
     error_message: "API Key not found."
     models:
       - "deepseek-chat"

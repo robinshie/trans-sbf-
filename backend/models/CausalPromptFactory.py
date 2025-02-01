@@ -27,8 +27,12 @@ class RoleConfig:
     @classmethod
     def get_role_name(cls, node_name: str) -> str:
         """获取指定角色名称"""
-        role_info = cls._prompts['roles'].get(node_name, {})
-        return role_info.get('name', None)
+        role_info = cls._prompts['roles']
+
+        for key, value in role_info.items():
+            if value["nodename"] == node_name:
+                return value["name"]
+        return None  # 如果没有匹配的 nodename，则返回 N
 
 class AssistanceConfig:
     """提示词配置管理"""

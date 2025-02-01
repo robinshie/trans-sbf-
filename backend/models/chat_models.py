@@ -55,7 +55,7 @@ class OpenAIModel(ChatModel):
         }        
         json_data = json.dumps(data)
 
-        async for chunk in self.async_stream_request("", headers=headers, json=json_data):
+        async for chunk in self.async_stream_request("/chat/completions", headers=headers, json=json_data):
             yield chunk
 
 class OllamaModel(ChatModel):
@@ -102,5 +102,5 @@ class DeepSeekModel(ChatModel):
         }
         json_data = json.dumps(data)
 
-        async for chunk in self.async_stream_request("", headers=headers, json=json_data):
+        async for chunk in self.async_stream_request("/chat/completions", headers=headers, json=json_data):
             yield chunk

@@ -65,8 +65,8 @@ class AsyncAPIClient:
                     if "message" in chunk and "content" in chunk["message"]:
                         yield chunk["message"]["content"]
                     # 解析 `reasoning_content`
-                    elif "reasoning_content" in chunk:
-                        yield chunk["reasoning_content"]
+                    elif "message" in chunk and "reasoning_content" in chunk["message"]:
+                        yield chunk["message"]["reasoning_content"]
                 except json.JSONDecodeError:
                     continue
 
