@@ -75,67 +75,79 @@ class PromptConfig:
 
 
 class CausalPromptFactory:
-    """提示词工厂类，用于构建不同场景的提示词"""
+    """支持模型识别和消息顺序控制的提示词工厂"""
     
-    def __init__(self):
-        """初始化提示词工厂"""
+    def __init__(self, model_name: str = "deepseek-reasoner"):
         self.config = PromptConfig()
         self.role = RoleConfig()
-    
+        self.model_name = model_name.lower()  # 统一转为小写
+
     @staticmethod
     def extract_keys(template: str) -> List[str]:
-        """从模板中提取占位符键"""
         return re.findall(r'\{(.*?)\}', template)
-        
-    async def build_prompt(self, params: Dict[str, Any]):
-        """
-        构建查询提示词
+    
+    def _is_deepseek_model(self) -> bool:
+        """判断是否为需要特殊处理的 Deepseek 模型"""
+        return "deepseek" in self.model_name
 
-        Args:
-            params (Dict[str, Any]): 包含 'query', 'texts', 'prompt_type', 和 'history' 的字典。
+    def _enforce_message_order(self, messages: List[ChatMessage]) -> List[ChatMessage]:
+        """根据模型要求强制调整消息顺序"""
+        if not messages:
+            return messages
 
-        Returns:
-            List[ChatMessage]: 完整的提示词消息列表
-        """
-        messages = []
-        prompt_type = params.get('prompt_type', 'prompts')
-        role = ''
-        # 遍历 prompt 的节点类型
-        for node in self.config.get_prompt_nodes(prompt_type):
-            rolename = self.role.get_role_name(node)
-            if rolename is not None:
-                role = rolename
-            else: 
-                role = 'assistant' 
-            # 获取当前节点的模板
-            node_template = self.config.get_prompt(node, prompt_type)
-            if not node_template:
-                continue
+        # Deepseek 模型特殊处理
+        if self._is_deepseek_model():
+            last_msg = messages[-1]
             
-            # 提取模板中的占位符并按长度降序排序（确保最大匹配优先）
-            keys = sorted(self.extract_keys(node_template), key=len, reverse=True)
+            # 强制最后一条必须是 user 或启用 prefix 的 assistant
+            if last_msg.role == "assistant":
+                # 如果已经是最后一条，保留但标记需要 prefix
+                self.need_prefix = True
+            else:
+                self.need_prefix = False
             
-            # 替换占位符为实际值
-            filled_content = node_template
-            for key in keys:
-                value = params.get(key, f"{{{key}}}")  # 如果未提供参数，保留占位符
-                
-                # 处理列表和字符串类型的值
-                if isinstance(value, list):
-                    value = "\n\n".join(str(v) for v in value)
-                elif isinstance(value, str):
-                    pass  # 字符串直接使用
-                else:
-                    value = str(value)  # 其他类型转为字符串
-                
-                # 替换占位符
-                filled_content = filled_content.replace(f"{{{key}}}", value)
-            
-            # 添加消息
-            messages.append(ChatMessage(role=role, content=filled_content))
+            # 检查连续角色问题
+            for i in range(1, len(messages)):
+                if messages[i].role == messages[i-1].role:
+                    # 自动插入修正消息
+                    fix_role = "user" if messages[i].role == "assistant" else "assistant"
+                    messages.insert(i, ChatMessage(
+                        role=fix_role, 
+                        content=f"[自动修正] 检测到连续 {messages[i].role} 角色",
+                        prefix= False
+                    ))
         
         return messages
-    
-    async def build_role(self, role: Role):
-        # Implementation logic for handling the role
-        print(f'Building role: {role}')
+
+    async def build_prompt(self, params: Dict[str, Any]) -> List[ChatMessage]:
+        messages = []
+        prompt_type = params.get('prompt_type', 'prompts')
+        self.need_prefix = False  # 重置标记
+
+        for node in self.config.get_prompt_nodes(prompt_type):
+            # 获取角色配置
+            role = self.role.get_role_name(node) or "assistant"
+            
+            # 模型特定角色覆盖
+            if self._is_deepseek_model() and node == "system":
+                role = "user"  # Deepseek 通常用 user 角色承载系统提示
+
+            # 获取并填充模板
+            template = self.config.get_prompt(node, prompt_type)
+            if not template:
+                continue
+
+            # 动态参数替换
+            keys = self.extract_keys(template)
+            content = template
+            for key in keys:
+                value = params.get(key, "")
+                if isinstance(value, list):
+                    value = "\n".join(map(str, value))
+                content = content.replace(f"{{{key}}}", str(value))
+
+            messages.append(ChatMessage(role=role, content=content, prefix=False))
+
+        # 后处理：消息顺序强制调整
+        messages = self._enforce_message_order(messages)
+        return messages

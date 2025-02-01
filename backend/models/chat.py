@@ -87,6 +87,7 @@ class ChatMessage(BaseModelWithJSON):
     """聊天消息模型"""
     role: str
     content: str
+    prefix: bool
 
 
 class ChatRequest(BaseModelWithJSON):

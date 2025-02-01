@@ -6,7 +6,7 @@ models:
     error_message: "Ollama configuration error."
     models:
       - "deepseek-r1:8b"
-      - "qwen2.5:latest"
+      - "qwen2.5:7b"
   openai:
     system_prompt: "You are a helpful assistant."
     api_url: "https://api.openai.com/v1"

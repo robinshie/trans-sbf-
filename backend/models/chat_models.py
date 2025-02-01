@@ -74,9 +74,6 @@ class OllamaModel(ChatModel):
             "messages": [msg.dict() for msg in messages],  # ✅ 确保是 Python 字典
             "stream": True
         }
-        if messages and messages[-1].role == 'assistant':
-            data["prefix"] = True
-        
         async for chunk in self.async_stream_request("/chat", headers=headers, json=data):  # ✅ 直接传字典
             yield chunk
 
@@ -97,8 +94,13 @@ class DeepSeekModel(ChatModel):
 
         data = {
             "model": self.model_name,
-            "messages": [msg.dict() for msg in messages],
-            "stream": True
+            "messages": [
+            {**msg.dict(), "prefix": msg.role == "assistant" and msg == messages[-1]}
+            for msg in messages
+        ],
+        "stream": True
         }
-        async for chunk in self.async_stream_request("/chat/completions", headers=headers, json=data):
+
+        
+        async for chunk in self.async_stream_request("/beta/chat/completions", headers=headers, json=data):
             yield chunk

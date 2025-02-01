@@ -221,7 +221,8 @@ export const chat = {
             },
             history: this.state.messageHistory.slice(-5).map(msg => ({
                 role: msg.role,
-                content: msg.content
+                content: msg.content,
+                prefix : false
             })),
             prompt_type: this.state.currentTemplate
         };
