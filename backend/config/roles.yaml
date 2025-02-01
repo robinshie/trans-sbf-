@@ -5,6 +5,6 @@ roles:
   user: 
     name: user
     nodename: query
-  assistence: 
-    name: assistence
-    nodename: assistence
+  assistant: 
+    name: assistant
+    nodename: assistant
