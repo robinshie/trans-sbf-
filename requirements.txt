@@ -6,5 +6,4 @@ pydantic==2.10.6
 pydantic_settings==2.7.1
 PyPDF2==3.0.1
 PyYAML==6.0.2
-PyYAML==6.0.2
 qwen_agent==0.0.15

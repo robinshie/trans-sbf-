@@ -31,10 +31,8 @@ class ChatService:
                 'history': history
             })
             
-            model = ModelFactory.create_model({
-                'manufacturer': model_choice.manufacturer,
-                'model': model_choice.model
-            })
+            model = ModelFactory.create_model(manufacturer= model_choice.manufacturer,
+                                              model_name= model_choice.model)
             
             # 生成流式响应
             async for chunk in model.stream_chat(messages):
