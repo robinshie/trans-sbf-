@@ -90,6 +90,8 @@ class AsyncAPIClient:
 
             async for line in response.aiter_lines():
                 line = line.strip()
+                if line.startswith(": keep-alive"):
+                    continue
                 if not line:
                     continue
                 if not line or not line.startswith("data: "):

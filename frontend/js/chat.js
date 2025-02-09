@@ -129,7 +129,8 @@ export const chat = {
                 `./readmode.html`,
                 `https://www.google.com/`,
                 `https://translate.google.com/?hl=zh-cn&sl=auto&tl=zh-CN&op=translate`,
-                `https://chatgpt.com/`
+                `https://chatgpt.com/`,
+                `https://chat.deepseek.com/`
             ]);
     
             ui.showNotification('已切换到外链模式', 'success');
